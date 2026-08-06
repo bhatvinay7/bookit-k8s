@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: default
+  labels:
+    app: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      evaluation_interval: 10s
+
+    scrape_configs:
+      - job_name: 'chess-game-server'
+        static_configs:
+          - targets: ['game-server.default.svc.cluster.local:9100']
+
+      - job_name: 'chess-sync-worker'
+        static_configs:
+          - targets: ['sync-worker.default.svc.cluster.local:9101']
+
+      - job_name: 'chess-matchmaker'
+        static_configs:
+          - targets: ['matchmaker.default.svc.cluster.local:9102']
+
+      - job_name: 'chess-cdc'
+        static_configs:
+          - targets: ['cdc.default.svc.cluster.local:9103']
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-chess
+  namespace: default
+  labels:
+    grafana_dashboard: "1"
+data:
+  chess-overview.json: |
+    {
+      "title": "Chess Platform - Production Observability Overview",
+      "panels": [
+        {
+          "title": "Active Connected Users / Matches",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "sum(chess_active_users_total)",
+              "legendFormat": "Active Users"
+            }
+          ]
+        },
+        {
+          "title": "Service Health Status (1.0 = Healthy, 0.0 = Unhealthy)",
+          "type": "stat",
+          "targets": [
+            {
+              "expr": "chess_service_health_status",
+              "legendFormat": "{{job}}"
+            }
+          ]
+        },
+        {
+          "title": "Process CPU Usage %",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "chess_process_cpu_usage_percent",
+              "legendFormat": "{{job}}"
+            }
+          ]
+        },
+        {
+          "title": "Process Memory (RAM RSS) in Bytes",
+          "type": "timeseries",
+          "targets": [
+            {
+              "expr": "chess_process_memory_bytes",
+              "legendFormat": "{{job}}"
+            }
+          ]
+        }
+      ]
+    }
