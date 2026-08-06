@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cdc
+  labels:
+    app: cdc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cdc
+  template:
+    metadata:
+      labels:
+        app: cdc
+    spec:
+      serviceAccountName: chess-app
+      containers:
+        - name: cdc
+          image: chess-cdc:latest
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: chess-config
+          env:
+            - name: SLOT_NAME
+              value: "schedular_slot"
+            - name: PUBLICATION
+              value: "schedule_tournament"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

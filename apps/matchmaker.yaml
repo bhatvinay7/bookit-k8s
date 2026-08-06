@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmaker
+  labels:
+    app: matchmaker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmaker
+  template:
+    metadata:
+      labels:
+        app: matchmaker
+    spec:
+      serviceAccountName: chess-app
+      containers:
+        - name: matchmaker
+          image: chess-matchmaker:latest
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: chess-config
+          ports:
+            - containerPort: 9102
+              name: metrics
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

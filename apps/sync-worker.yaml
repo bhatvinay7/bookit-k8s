@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-worker
+  labels:
+    app: sync-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-worker
+  template:
+    metadata:
+      labels:
+        app: sync-worker
+    spec:
+      serviceAccountName: chess-app
+      containers:
+        - name: sync-worker
+          image: chess-sync-worker:latest
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: chess-config
+          ports:
+            - containerPort: 9101
+              name: metrics
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sync-worker-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sync-worker
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
