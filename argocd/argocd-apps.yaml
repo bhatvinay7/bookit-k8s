@@ -3,16 +3,25 @@ kind: Application
 metadata:
   name: chess-apps
   namespace: argocd
+<<<<<<< HEAD
   annotations:
     argocd.argoproj.io/sync-wave: "2"
+=======
+>>>>>>> dce2e99 (Add argocd)
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
+<<<<<<< HEAD
     repoURL: https://github.com/bhatvinay75/chess-k8s.git
     targetRevision: HEAD
     path: apps
+=======
+    repoURL: https://github.com/your-org/chess.git
+    targetRevision: HEAD
+    path: k8s/apps
+>>>>>>> dce2e99 (Add argocd)
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -23,6 +32,7 @@ spec:
       jsonPointers:
         - /data
         - /stringData
+<<<<<<< HEAD
     - group: ""
       kind: Secret
       name: frontend-secrets
@@ -35,6 +45,8 @@ spec:
       jsonPointers:
         - /data
         - /stringData
+=======
+>>>>>>> dce2e99 (Add argocd)
   syncPolicy:
     automated:
       prune: true

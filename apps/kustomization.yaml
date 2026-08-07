@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+<<<<<<< HEAD
   # NOTE: To use your secrets, encrypt them using kubeseal and save them.
 resources:
 - sealed-backend-secrets.yaml
@@ -46,3 +47,46 @@ images:
 - name: chess-ws-server
   newName: ghcr.io/bhatvinay75/chess-ws-server
   newTag: commit-0bb44c6
+=======
+resources:
+  - configmap.yaml
+  - secrets.yaml
+  - game-server-headless.yaml
+  - http-server.yaml
+  - ws-server.yaml
+  - game-server.yaml
+  - sync-worker.yaml
+  - notification-worker.yaml
+  - matchmaker.yaml
+  - cdc.yaml
+  - web.yaml
+  - ingress.yaml
+  - grpc-ingress.yaml
+
+# CI/CD (GitHub Actions) updates newTag to the latest build commit SHA
+images:
+  - name: chess-http-server
+    newName: ghcr.io/your-org/chess-http-server
+    newTag: latest
+  - name: chess-ws-server
+    newName: ghcr.io/your-org/chess-ws-server
+    newTag: latest
+  - name: chess-game-server
+    newName: ghcr.io/your-org/chess-game-server
+    newTag: latest
+  - name: chess-sync-worker
+    newName: ghcr.io/your-org/chess-sync-worker
+    newTag: latest
+  - name: chess-notification-worker
+    newName: ghcr.io/your-org/chess-notification-worker
+    newTag: latest
+  - name: chess-matchmaker
+    newName: ghcr.io/your-org/chess-matchmaker
+    newTag: latest
+  - name: chess-cdc
+    newName: ghcr.io/your-org/chess-cdc
+    newTag: latest
+  - name: chess-web
+    newName: ghcr.io/your-org/chess-web
+    newTag: latest
+>>>>>>> dce2e99 (Add argocd)
