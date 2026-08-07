@@ -25,7 +25,7 @@ resources:
 images:
 - name: chess-cdc
   newName: ghcr.io/bhatvinay75/chess-cdc
-  newTag: commit-d2bd500
+  newTag: commit-8bc02ff
 - name: chess-game-server
   newName: ghcr.io/bhatvinay75/chess-game-server
   newTag: commit-d2bd500
