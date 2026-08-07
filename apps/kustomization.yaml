@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
 - sealed-backend-secrets.yaml
 - sealed-frontend-secrets.yaml
+- ghcr-secret.yaml
 - rbac.yaml
 - cert-manager-issuer.yaml
 - configmap.yaml
