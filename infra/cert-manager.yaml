@@ -16,30 +16,9 @@ spec:
     helm:
       values: |
         installCRDs: true
-        resources:
-          requests:
-            cpu: 20m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 256Mi
         webhook:
           timeoutSeconds: 10
-          resources:
-            requests:
-              cpu: 20m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
         cainjector:
-          resources:
-            requests:
-              cpu: 20m
-              memory: 64Mi
-            limits:
-              cpu: 200m
-              memory: 256Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager

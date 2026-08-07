@@ -26,13 +26,6 @@ spec:
           ports:
             - containerPort: 9101
               name: metrics
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              cpu: 300m
-              memory: 256Mi
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

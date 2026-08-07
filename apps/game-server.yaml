@@ -28,13 +28,6 @@ spec:
               name: grpc
             - containerPort: 9100
               name: metrics
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 500m
-              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service

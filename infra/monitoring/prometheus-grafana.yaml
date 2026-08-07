@@ -16,13 +16,6 @@ spec:
     helm:
       values: |
         grafana:
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 200m
-              memory: 512Mi
           ingress:
             enabled: true
             ingressClassName: nginx
@@ -42,13 +35,6 @@ spec:
               labelValue: "1"
         prometheus:
           prometheusSpec:
-            resources:
-              requests:
-                cpu: 200m
-                memory: 512Mi
-              limits:
-                cpu: 500m
-                memory: 1Gi
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
   destination:
