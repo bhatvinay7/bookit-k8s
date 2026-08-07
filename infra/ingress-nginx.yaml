@@ -12,19 +12,24 @@ spec:
   source:
     chart: ingress-nginx
     repoURL: https://kubernetes.github.io/ingress-nginx
-    targetRevision: 4.8.3
+    targetRevision: 4.10.0
     helm:
       values: |
         controller:
+          service:
+            type: NodePort
+            nodePorts:
+              http: 32080
+              https: 32443
           metrics:
             enabled: true
           resources:
             requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
               cpu: 250m
               memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 1Gi
   destination:
     server: https://kubernetes.default.svc
     namespace: ingress-nginx
@@ -34,3 +39,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
