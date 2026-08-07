@@ -43,7 +43,7 @@ images:
   newTag: commit-d2bd500
 - name: chess-web
   newName: ghcr.io/bhatvinay75/chess-web
-  newTag: commit-d2bd500
+  newTag: commit-4176096
 - name: chess-ws-server
   newName: ghcr.io/bhatvinay75/chess-ws-server
   newTag: commit-d2bd500
