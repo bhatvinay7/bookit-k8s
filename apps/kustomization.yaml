@@ -7,7 +7,7 @@ resources:
 - sealed-frontend-secrets.yaml
 - ghcr-secret.yaml
 - rbac.yaml
-# - cert-manager-issuer.yaml
+- cert-manager-issuer.yaml
 - configmap.yaml
 - game-server-headless.yaml
 - http-server.yaml
