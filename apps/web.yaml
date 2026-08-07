@@ -14,20 +14,13 @@ spec:
       labels:
         app: web
     spec:
-<<<<<<< HEAD
       serviceAccountName: chess-app
-=======
->>>>>>> dce2e99 (Add argocd)
       containers:
         - name: web
           image: chess-web:latest
           envFrom:
             - secretRef:
-<<<<<<< HEAD
                 name: frontend-secrets
-=======
-                name: chess-secrets
->>>>>>> dce2e99 (Add argocd)
             - configMapRef:
                 name: chess-config
           ports:
