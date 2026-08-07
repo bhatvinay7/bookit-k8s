@@ -20,11 +20,11 @@ spec:
           image: chess-notification-worker:latest
           resources:
             requests:
-              cpu: "100m"
-              memory: "64Mi"
+              cpu: "250m"
+              memory: "256Mi"
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: "1000m"
+              memory: "1Gi"
           envFrom:
             - secretRef:
                 name: backend-secrets
