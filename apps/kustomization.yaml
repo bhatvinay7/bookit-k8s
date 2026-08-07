@@ -24,25 +24,25 @@ resources:
 images:
 - name: chess-cdc
   newName: ghcr.io/bhatvinay75/chess-cdc
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-game-server
   newName: ghcr.io/bhatvinay75/chess-game-server
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-http-server
   newName: ghcr.io/bhatvinay75/chess-http-server
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-matchmaker
   newName: ghcr.io/bhatvinay75/chess-matchmaker
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-notification-worker
   newName: ghcr.io/bhatvinay75/chess-notification-worker
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-sync-worker
   newName: ghcr.io/bhatvinay75/chess-sync-worker
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-web
   newName: ghcr.io/bhatvinay75/chess-web
-  newTag: latest
+  newTag: commit-8dfa622
 - name: chess-ws-server
   newName: ghcr.io/bhatvinay75/chess-ws-server
-  newTag: latest
+  newTag: commit-8dfa622
