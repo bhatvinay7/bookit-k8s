@@ -18,7 +18,6 @@ spec:
         installCRDs: true
         webhook:
           timeoutSeconds: 10
-        cainjector:
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
