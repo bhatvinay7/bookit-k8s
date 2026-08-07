@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   # NOTE: To use your secrets, encrypt them using kubeseal and save them.
 resources:
 - sealed-backend-secrets.yaml
@@ -50,21 +51,27 @@ images:
 =======
 resources:
   - configmap.yaml
-  - secrets.yaml
-  - game-server-headless.yaml
-  - http-server.yaml
-  - ws-server.yaml
-  - game-server.yaml
-  - sync-worker.yaml
-  - notification-worker.yaml
-  - matchmaker.yaml
-  - cdc.yaml
-  - web.yaml
-  - ingress.yaml
-  - grpc-ingress.yaml
+=======
+>>>>>>> 60455fd (chore(gitops): update image tags to commit-4846de3 [skip ci])
+  # secrets.yaml intentionally excluded — real Secret is created by CI (deploy-secrets job via kubectl)
+  # ArgoCD reads from chess-secrets Secret created by kubectl create secret generic chess-secrets
+resources:
+- configmap.yaml
+- game-server-headless.yaml
+- http-server.yaml
+- ws-server.yaml
+- game-server.yaml
+- sync-worker.yaml
+- notification-worker.yaml
+- matchmaker.yaml
+- cdc.yaml
+- web.yaml
+- ingress.yaml
+- grpc-ingress.yaml
 
 # CI/CD (GitHub Actions) updates newTag to the latest build commit SHA
 images:
+<<<<<<< HEAD
   - name: chess-http-server
     newName: ghcr.io/your-org/chess-http-server
     newTag: latest
@@ -90,3 +97,29 @@ images:
     newName: ghcr.io/your-org/chess-web
     newTag: latest
 >>>>>>> dce2e99 (Add argocd)
+=======
+- name: chess-cdc
+  newName: ghcr.io/bhatvinay7/chess-cdc
+  newTag: commit-4846de3
+- name: chess-game-server
+  newName: ghcr.io/bhatvinay7/chess-game-server
+  newTag: commit-4846de3
+- name: chess-http-server
+  newName: ghcr.io/bhatvinay7/chess-http-server
+  newTag: commit-4846de3
+- name: chess-matchmaker
+  newName: ghcr.io/bhatvinay7/chess-matchmaker
+  newTag: commit-4846de3
+- name: chess-notification-worker
+  newName: ghcr.io/bhatvinay7/chess-notification-worker
+  newTag: commit-4846de3
+- name: chess-sync-worker
+  newName: ghcr.io/bhatvinay7/chess-sync-worker
+  newTag: commit-4846de3
+- name: chess-web
+  newName: ghcr.io/bhatvinay7/chess-web
+  newTag: commit-4846de3
+- name: chess-ws-server
+  newName: ghcr.io/bhatvinay7/chess-ws-server
+  newTag: commit-4846de3
+>>>>>>> 60455fd (chore(gitops): update image tags to commit-4846de3 [skip ci])

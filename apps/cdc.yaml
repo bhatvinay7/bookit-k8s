@@ -14,13 +14,20 @@ spec:
       labels:
         app: cdc
     spec:
+<<<<<<< HEAD
       serviceAccountName: chess-app
+=======
+>>>>>>> dce2e99 (Add argocd)
       containers:
         - name: cdc
           image: chess-cdc:latest
           envFrom:
             - secretRef:
+<<<<<<< HEAD
                 name: backend-secrets
+=======
+                name: chess-secrets
+>>>>>>> dce2e99 (Add argocd)
             - configMapRef:
                 name: chess-config
           env:

@@ -6,18 +6,26 @@ metadata:
     app: game-server
   annotations:
     kubernetes.io/ingress.class: "nginx"
+<<<<<<< HEAD
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+=======
+>>>>>>> dce2e99 (Add argocd)
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
+<<<<<<< HEAD
   tls:
     - hosts:
         - grpc.chesscounty.life
       secretName: grpc-chesscounty-life-tls
   rules:
     - host: grpc.chesscounty.life
+=======
+  rules:
+    - host: grpc.chess.example.com
+>>>>>>> dce2e99 (Add argocd)
       http:
         paths:
           - path: /
