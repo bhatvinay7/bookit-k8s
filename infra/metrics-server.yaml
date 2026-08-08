@@ -18,6 +18,7 @@ metadata:
 rules:
 - apiGroups:
   - metrics.k8s.io
+  resources:
   - pods
   - nodes
   verbs:
@@ -34,11 +35,13 @@ metadata:
 rules:
 - apiGroups:
   - ""
+  resources:
   - nodes/metrics
   verbs:
   - get
 - apiGroups:
   - ""
+  resources:
   - pods
   - nodes
   verbs:
