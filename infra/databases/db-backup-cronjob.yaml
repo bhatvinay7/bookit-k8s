@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: bookit
+spec:
+  schedule: "0 0 * * *" # Daily at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pg-backup
+            image: postgres:15-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              TIMESTAMP=$(date +%Y%m%d%H%M%S)
+              pg_dump $DATABASE_URL -F c -f /tmp/backup-$TIMESTAMP.dump
+              # Normally we would upload to S3/R2 using minio client (mc) or awscli here
+              echo "Backup completed: /tmp/backup-$TIMESTAMP.dump"
+            envFrom:
+            - secretRef:
+                name: backend-secrets
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+  namespace: bookit
+spec:
+  schedule: "30 0 * * *" # Daily at 00:30
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: mongo-backup
+            image: mongo:6
+            command:
+            - /bin/sh
+            - -c
+            - |
+              TIMESTAMP=$(date +%Y%m%d%H%M%S)
+              mongodump --uri="$MONGO_DB_URL" --archive=/tmp/mongo-backup-$TIMESTAMP.gz --gzip
+              # Upload logic here
+              echo "MongoDB backup completed"
+            envFrom:
+            - secretRef:
+                name: backend-secrets
+          restartPolicy: OnFailure

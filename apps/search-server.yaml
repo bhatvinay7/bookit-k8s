@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: matchmaker
+  name: search-server
   labels:
-    app: matchmaker
+    app: search-server
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: matchmaker
+      app: search-server
   template:
     metadata:
       labels:
-        app: matchmaker
+        app: search-server
     spec:
-      serviceAccountName: chess-app
+      serviceAccountName: bookit-app
       containers:
-        - name: matchmaker
-          image: chess-matchmaker:latest
+        - name: search-server
+          image: ghcr.io/bhatvinay7/bookit-search-server:latest
           resources:
             requests:
-              cpu: "50m"
+              cpu: "100m"
               memory: "128Mi"
             limits:
               cpu: "200m"
@@ -29,7 +29,4 @@ spec:
             - secretRef:
                 name: backend-secrets
             - configMapRef:
-                name: chess-config
-          ports:
-            - containerPort: 9102
-              name: metrics
+                name: bookit-config

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: chess-config
+  name: bookit-config
   labels:
     app: chess
 data:
@@ -12,3 +12,4 @@ data:
   METRICS_PORT: "9100"
   LOG_LEVEL: "info"
   NODE_ENV: "production"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

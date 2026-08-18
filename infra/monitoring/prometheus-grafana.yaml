@@ -33,8 +33,15 @@ spec:
               enabled: true
               label: grafana_dashboard
               labelValue: "1"
+          additionalDataSources:
+            - name: Tempo
+              type: tempo
+              uid: tempo
+              url: http://tempo.monitoring.svc.cluster.local:3200
+              access: proxy
         prometheus:
           prometheusSpec:
+            retention: 15d
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
   destination:

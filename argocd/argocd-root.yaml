@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/bhatvinay75/chess-k8s.git
+    repoURL: https://github.com/bhatvinay7/bookit-k8s.git
     targetRevision: HEAD
     path: argocd
   destination:

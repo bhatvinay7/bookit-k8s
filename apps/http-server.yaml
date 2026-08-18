@@ -14,10 +14,10 @@ spec:
       labels:
         app: http-server
     spec:
-      serviceAccountName: chess-app
+      serviceAccountName: bookit-app
       containers:
         - name: http-server
-          image: chess-http-server:latest
+          image: bookit-http-server:latest
           resources:
             requests:
               cpu: "50m"
@@ -31,7 +31,7 @@ spec:
             - secretRef:
                 name: frontend-secrets
             - configMapRef:
-                name: chess-config
+                name: bookit-config
           ports:
             - containerPort: 3002
 ---

@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: chess-app
+  name: bookit-app
   labels:
-    app: chess
+    app: bookit
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: chess-secrets-reader
+  name: bookit-secrets-reader
   labels:
     app: chess
 rules:
@@ -20,13 +20,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: chess-secrets-reader-binding
+  name: bookit-secrets-reader-binding
   labels:
     app: chess
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: chess-secrets-reader
+  name: bookit-secrets-reader
 subjects:
   - kind: ServiceAccount
-    name: chess-app
+    name: bookit-app

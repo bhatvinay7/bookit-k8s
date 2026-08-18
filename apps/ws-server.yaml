@@ -14,10 +14,10 @@ spec:
       labels:
         app: ws-server
     spec:
-      serviceAccountName: chess-app
+      serviceAccountName: bookit-app
       containers:
         - name: ws-server
-          image: chess-ws-server:latest
+          image: bookit-ws-server:latest
           resources:
             requests:
               cpu: "50m"
@@ -29,7 +29,7 @@ spec:
             - secretRef:
                 name: backend-secrets
             - configMapRef:
-                name: chess-config
+                name: bookit-config
           ports:
             - containerPort: 8080
 ---

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lock-server
+  namespace: bookit
+  labels:
+    app: lock-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lock-server
+  template:
+    metadata:
+      labels:
+        app: lock-server
+    spec:
+      containers:
+        - name: lock-server
+          image: ghcr.io/bhatvinay7/bookit-lock-server:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: bookit-config
+          env:
+            - name: LOCK_WORKER_CONCURRENCY
+              value: "10"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

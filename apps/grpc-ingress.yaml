@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: chess-grpc-ingress
+  name: bookit-grpc-ingress
   labels:
-    app: game-server
+    app: bookit
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
@@ -24,6 +24,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: game-server
+                name: gateway-keeper
                 port:
-                  number: 50051
+                  number: 50052

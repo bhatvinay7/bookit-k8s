@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cdc
+  name: payment-processor
   labels:
-    app: cdc
+    app: payment-processor
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cdc
+      app: payment-processor
   template:
     metadata:
       labels:
-        app: cdc
+        app: payment-processor
     spec:
-      serviceAccountName: chess-app
+      serviceAccountName: bookit-app
       containers:
-        - name: cdc
-          image: chess-cdc:latest
+        - name: payment-processor
+          image: ghcr.io/bhatvinay7/bookit-payment-processor:latest
           resources:
             requests:
-              cpu: "50m"
+              cpu: "100m"
               memory: "128Mi"
             limits:
               cpu: "200m"
@@ -29,9 +29,4 @@ spec:
             - secretRef:
                 name: backend-secrets
             - configMapRef:
-                name: chess-config
-          env:
-            - name: SLOT_NAME
-              value: "schedular_slot"
-            - name: PUBLICATION
-              value: "schedule_tournament"
+                name: bookit-config

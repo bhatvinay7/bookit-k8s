@@ -1,0 +1,34 @@
+# Zalando Postgres Operator - Multi-Region Setup Template
+# This file provides the configuration for setting up a highly available PostgreSQL cluster
+# with cross-region streaming replication using the Zalando Postgres Operator.
+
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: bookit-postgres-cluster
+  namespace: bookit
+spec:
+  teamId: "bookit"
+  volume:
+    size: 20Gi
+  numberOfInstances: 3 # 1 Master, 2 Replicas in the primary region
+  users:
+    bookit_user:
+    - superuser
+    - createdb
+  databases:
+    bookit: bookit_user
+  postgresql:
+    version: "15"
+  
+  # For Multi-Region (Active-Passive) setup, you would deploy a second cluster in Region B
+  # configured as a standby cluster pointing to the S3 WAL archive of this primary cluster.
+  # Example configuration for the standby (in Region B):
+  # standbyCluster:
+  #   s3_wal_path: s3://bookit-db-backups/postgres-wal/
+  
+  env:
+  - name: USE_WALG_BACKUP
+    value: "true"
+  - name: WALG_S3_PREFIX
+    value: "s3://bookit-db-backups/postgres-wal/"

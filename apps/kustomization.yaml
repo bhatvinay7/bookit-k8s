@@ -9,41 +9,40 @@ resources:
 - rbac.yaml
 - cert-manager-issuer.yaml
 - configmap.yaml
-- game-server-headless.yaml
 - http-server.yaml
 - ws-server.yaml
-- game-server.yaml
-- sync-worker.yaml
+- gateway-keeper.yaml
+- lock-server.yaml
 - notification-worker.yaml
-- matchmaker.yaml
-- cdc.yaml
+- payment-processor.yaml
+- search-server.yaml
 - web.yaml
 - ingress.yaml
 - grpc-ingress.yaml
 
 # CI/CD (GitHub Actions) updates newTag to the latest build commit SHA
 images:
-- name: chess-cdc
-  newName: ghcr.io/bhatvinay75/chess-cdc
+- name: bookit-gateway-keeper
+  newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
   newTag: commit-d6533e8
-- name: chess-game-server
-  newName: ghcr.io/bhatvinay75/chess-game-server
+- name: bookit-lock-server
+  newName: ghcr.io/bhatvinay7/bookit-lock-server
   newTag: commit-d6533e8
-- name: chess-http-server
-  newName: ghcr.io/bhatvinay75/chess-http-server
+- name: bookit-http-server
+  newName: ghcr.io/bhatvinay7/bookit-http-server
   newTag: commit-d6533e8
-- name: chess-matchmaker
-  newName: ghcr.io/bhatvinay75/chess-matchmaker
+- name: bookit-notification-worker
+  newName: ghcr.io/bhatvinay7/bookit-notification-worker
   newTag: commit-d6533e8
-- name: chess-notification-worker
-  newName: ghcr.io/bhatvinay75/chess-notification-worker
+- name: bookit-payment-processor
+  newName: ghcr.io/bhatvinay7/bookit-payment-processor
   newTag: commit-d6533e8
-- name: chess-sync-worker
-  newName: ghcr.io/bhatvinay75/chess-sync-worker
+- name: bookit-search-server
+  newName: ghcr.io/bhatvinay7/bookit-search-server
   newTag: commit-d6533e8
-- name: chess-web
-  newName: ghcr.io/bhatvinay75/chess-web
+- name: bookit-web
+  newName: ghcr.io/bhatvinay7/bookit-web
   newTag: commit-661b76d
-- name: chess-ws-server
-  newName: ghcr.io/bhatvinay75/chess-ws-server
+- name: bookit-ws-server
+  newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-d6533e8

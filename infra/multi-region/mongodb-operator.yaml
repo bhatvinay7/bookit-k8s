@@ -1,0 +1,35 @@
+# Percona Distribution for MongoDB Operator - Multi-Region Template
+# This file provides the configuration for setting up a MongoDB Replica Set
+# using the Percona Operator, which supports multi-cluster (multi-region) stretching.
+
+apiVersion: psmdb.percona.com/v1-120
+kind: PerconaServerMongoDB
+metadata:
+  name: bookit-mongodb-cluster
+  namespace: bookit
+spec:
+  crVersion: 1.12.0
+  image: percona/percona-server-mongodb:6.0.8-7
+  allowUnsafeConfigurations: false
+  upgradeOptions:
+    apply: 6.0-recommended
+    schedule: "0 2 * * *"
+  secrets:
+    users: backend-secrets
+  replsets:
+  - name: rs0
+    size: 3 # Primary Region
+    volumeSpec:
+      persistentVolumeClaim:
+        resources:
+          requests:
+            storage: 20Gi
+  
+  # For Multi-Region (Stretched Replica Set):
+  # You would install the Percona Operator in both regions and configure
+  # cross-cluster networking (e.g., using Submariner or Cilium ClusterMesh).
+  # You can then extend the replica set size and assign nodes to specific regions
+  # using nodeAffinity and split the voters (e.g., 3 in Region A, 2 in Region B).
+  
+  sharding:
+    enabled: false
