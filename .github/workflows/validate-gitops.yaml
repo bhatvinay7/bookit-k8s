@@ -1,0 +1,46 @@
+name: Validate GitOps Manifests
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: validate-gitops-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Render dev and production overlays
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Render all Kustomize targets
+        run: |
+          targets=(
+            apps/regions/dev/us-east
+            apps/regions/prod/us-east
+            apps/regions/prod/eu-west
+            infra/overlays/dev
+            infra/overlays/prod
+            infra/base/custom-db-ha
+          )
+          for target in "${targets[@]}"; do
+            echo "Rendering $target"
+            kubectl kustomize "$target" >/dev/null
+          done
+
+      - name: Reject plaintext secret manifests
+        run: |
+          if git grep -n -E '^kind: Secret$|^stringData:' -- '*.yaml' '*.yml'; then
+            echo "Plain Kubernetes Secret manifests are forbidden. Commit SealedSecret ciphertext only."
+            exit 1
+          fi

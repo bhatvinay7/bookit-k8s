@@ -13,8 +13,23 @@ this repository.
 
 Never merge an automated image update from `dev` directly into production.
 Promote application code through a reviewed `dev -> main` pull request. The
-successful `main` build writes its own immutable `commit-<sha>` image tags to
-the GitOps `main` branch.
+`Promote Tested Images to Production` workflow accepts a successfully built dev
+commit, resolves its image tags to immutable GHCR digests, and opens a GitOps
+pull request against `main`. Production never rebuilds or consumes a floating
+`latest` tag.
+
+Protect `bookit-k8s/main` in GitHub Settings -> Branches (or Rulesets) with:
+
+- require a pull request before merging;
+- require at least one approval and dismiss stale approvals;
+- require the `Render dev and production overlays` status check;
+- require conversations to be resolved;
+- block force pushes and deletions;
+- restrict direct pushes to `main`, including GitHub Actions;
+- require signed commits if every authorized maintainer supports them.
+
+The promotion workflow pushes only `promote/*` branches. Branch protection is a
+GitHub repository setting and cannot be enforced by YAML stored in this repo.
 
 ## Repository layout
 
@@ -251,12 +266,16 @@ Development:
 Production:
 
 1. Open and approve the application `dev -> main` PR.
-2. Approve the GitHub `production` environment deployment.
-3. Confirm `bookit-k8s/main` receives only production overlay changes.
-4. Sync the secondary region first and run smoke tests.
-5. Sync the primary region and observe SLO/error-budget dashboards.
-6. Enable or update global traffic only after regional health is proven.
-7. Record the image SHA, GitOps commit, database migration, and rollback point.
+2. Run `Promote Tested Images to Production` with the full tested dev SHA and
+   only the services built at that SHA (or `all` after a full dev build).
+3. Enter `PROMOTE-PRODUCTION` and approve the GitHub `production` environment.
+4. Review the generated `bookit-k8s/main` PR and its resolved image digests.
+5. Merge only after the GitOps render check and required approval pass.
+6. Sync the secondary region first and run smoke tests.
+7. Sync the primary region and observe SLO/error-budget dashboards.
+8. Enable or update global traffic only after regional health is proven.
+9. Record the source SHA, image digests, GitOps commit, database migration, and
+   rollback point.
 
 Recovery must be rehearsed. A regional exercise is successful only when the
 database role, application traffic, secrets, queues, monitoring, and rollback
