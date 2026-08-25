@@ -1,0 +1,46 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: bookit-postgres
+  namespace: bookit
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-15.4-0
+  postgresVersion: 15
+  instances:
+    - name: instance1
+      replicas: 3
+      dataVolumeClaimSpec:
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: 20Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+  patroni:
+    dynamicConfiguration:
+      synchronous_mode: true
+      postgresql:
+        parameters:
+          max_connections: "200"
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:centos8-2.45-0
+      repos:
+      - name: repo1
+        s3:
+          bucket: "bookit-db-backups"
+          endpoint: "${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          region: "auto"
+        schedules:
+          full: "0 1 * * 0"
+          differential: "0 1 * * 1-6"
+  proxy:
+    pgBouncer:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbouncer:centos8-1.18-0
+      replicas: 2

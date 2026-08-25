@@ -1,0 +1,13 @@
+# Never commit plaintext Kubernetes secrets or kubeconfigs.
+**/secret.env
+**/*.kubeconfig
+kubeconfig*
+
+# Legacy local-only files from the flat layout migration. Cluster-specific
+# ciphertext is committed only below apps/regions/*/*/secrets/.
+/apps/base/secrets.yaml
+/apps/base/ghcr-secret.yaml
+/apps/base/sealed-*.yaml
+
+# SealedSecret YAML is encrypted and is expected to be committed. Do not add a
+# blanket sealed-*.yaml ignore rule: Argo CD must be able to read ciphertext.

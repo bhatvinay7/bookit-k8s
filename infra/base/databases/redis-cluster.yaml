@@ -1,0 +1,81 @@
+apiVersion: databases.spotahome.com/v1
+kind: RedisFailover
+metadata:
+  name: bookit-redis
+  namespace: bookit
+spec:
+  sentinel:
+    replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+  redis:
+    replicas: 3
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    storage:
+      persistentVolumeClaim:
+        metadata:
+          name: redis-data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+    exporter:
+      enabled: true
+      image: oliver006/redis_exporter:v1.44.0
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redis-s3-backup
+  namespace: bookit
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: s3-backup
+            image: amazon/aws-cli
+            command:
+            - /bin/sh
+            - -c
+            - "aws s3 cp /data/dump.rdb s3://bookit-db-backups/redis/dump-$(date +%Y%m%d%H%M%S).rdb --endpoint-url https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: bookit-secrets
+                  key: CLOUDFLARE_R2_ACCESS_KEY
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bookit-secrets
+                  key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+            - name: CLOUDFLARE_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: bookit-secrets
+                  key: CLOUDFLARE_ACCOUNT_ID
+            volumeMounts:
+            - name: redis-data
+              mountPath: /data
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: redis-data
+            persistentVolumeClaim:
+              claimName: redis-data-rfr-bookit-redis-0

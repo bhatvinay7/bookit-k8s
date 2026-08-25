@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bookit-dev
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: dev-cluster-us-east
+        url: https://kubernetes.default.svc
+        appsPath: apps/regions/dev/us-east
+  template:
+    metadata:
+      name: '{{cluster}}-dev-apps'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/bhatvinay7/bookit-k8s.git
+        targetRevision: dev
+        path: '{{appsPath}}'
+      destination:
+        server: '{{url}}'
+        namespace: bookit
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: bookit-infra-dev
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - cluster: dev-cluster-us-east
+        url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: '{{cluster}}-dev-infra'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/bhatvinay7/bookit-k8s.git
+        targetRevision: dev
+        path: infra/overlays/dev
+      destination:
+        server: '{{url}}'
+        namespace: bookit
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: gateway-keeper
+  name: gateway-keeper
+  namespace: bookit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-keeper
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
+      labels:
+        app: gateway-keeper
+    spec:
+      containers:
+      - env:
+        - name: GATEWAY_KEEPER_ADDR
+          value: 0.0.0.0:8080
+        - name: GATEWAY_KEEPER_GRPC_ADDR
+          value: '[::]:50052'
+        envFrom:
+        - secretRef:
+            name: backend-secrets
+        - configMapRef:
+            name: bookit-config
+        image: ghcr.io/bhatvinay7/bookit-gateway-keeper:latest
+        imagePullPolicy: Always
+        name: gateway-keeper
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 50052
+          name: grpc
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      imagePullSecrets:
+      - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-keeper
+  namespace: bookit
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: grpc
+    port: 50052
+    targetPort: 50052
+  selector:
+    app: gateway-keeper
+  type: ClusterIP
+  clusterIP: None
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway-keeper-hpa
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 75
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: gateway-keeper

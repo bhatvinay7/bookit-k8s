@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: chess-root-app
+  name: bookit-root-app
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -9,7 +9,8 @@ spec:
   project: default
   source:
     repoURL: https://github.com/bhatvinay7/bookit-k8s.git
-    targetRevision: HEAD
+    # Bootstrap replaces this with dev or main before applying it.
+    targetRevision: dev
     path: argocd
   destination:
     server: https://kubernetes.default.svc

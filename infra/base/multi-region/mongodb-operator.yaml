@@ -1,0 +1,48 @@
+apiVersion: psmdb.percona.com/v1-120
+kind: PerconaServerMongoDB
+metadata:
+  name: bookit-mongodb-cluster
+  namespace: bookit
+spec:
+  crVersion: 1.12.0
+  image: percona/percona-server-mongodb:6.0.8-7
+  allowUnsafeConfigurations: false
+  upgradeOptions:
+    apply: 6.0-recommended
+    schedule: "0 2 * * *"
+  secrets:
+    users: backend-secrets
+  replsets:
+  - name: rs0
+    size: 3 # Primary Region
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    volumeSpec:
+      persistentVolumeClaim:
+        resources:
+          requests:
+            storage: 20Gi
+  backup:
+    enabled: true
+    image: percona/percona-backup-mongodb:2.0.4
+    storages:
+      cloudflare-r2:
+        type: s3
+        s3:
+          bucket: bookit-db-backups
+          credentialsSecret: bookit-secrets
+          region: auto
+          endpointUrl: https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
+          prefix: mongodb
+    tasks:
+      - name: daily-r2-backup
+        enabled: true
+        schedule: "0 0 * * *"
+        storageName: cloudflare-r2
+  sharding:
+    enabled: false

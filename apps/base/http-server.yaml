@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: http-server
+  name: http-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: '3002'
+        prometheus.io/scrape: 'true'
+      labels:
+        app: http-server
+    spec:
+      containers:
+      - envFrom:
+        - secretRef:
+            name: backend-secrets
+        - secretRef:
+            name: frontend-secrets
+        - configMapRef:
+            name: bookit-config
+        image: bookit-http-server:latest
+        name: http-server
+        ports:
+        - containerPort: 3002
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
+      imagePullSecrets:
+      - name: ghcr-secret
+      serviceAccountName: bookit-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: http-server
+  name: http-server
+spec:
+  ports:
+  - name: http
+    port: 3002
+    targetPort: 3002
+  selector:
+    app: http-server
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: http-server-hpa
+spec:
+  maxReplicas: 5
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 75
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: http-server
