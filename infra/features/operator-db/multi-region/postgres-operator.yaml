@@ -34,8 +34,10 @@ spec:
       repos:
       - name: repo1
         s3:
-          bucket: "bookit-db-backups"
-          endpoint: "${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          # Kustomize does not expand these tokens. Environment overlays must
+          # patch them with the non-secret R2 bucket and endpoint values.
+          bucket: "${CLOUDFLARE_R2_BUCKET}"
+          endpoint: "${CLOUDFLARE_R2_ENDPOINT}"
           region: "auto"
         schedules:
           full: "0 1 * * 0"

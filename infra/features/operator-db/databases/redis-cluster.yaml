@@ -53,23 +53,28 @@ spec:
             command:
             - /bin/sh
             - -c
-            - "aws s3 cp /data/dump.rdb s3://bookit-db-backups/redis/dump-$(date +%Y%m%d%H%M%S).rdb --endpoint-url https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            - "aws s3 cp /data/dump.rdb s3://${CLOUDFLARE_R2_BUCKET}/redis/dump-$(date +%Y%m%d%H%M%S).rdb --endpoint-url ${CLOUDFLARE_R2_ENDPOINT}"
             env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: bookit-secrets
-                  key: CLOUDFLARE_R2_ACCESS_KEY
+                  key: CLOUDFLARE_R2_ACCESS_KEY_ID
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: bookit-secrets
                   key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
-            - name: CLOUDFLARE_ACCOUNT_ID
+            - name: CLOUDFLARE_R2_ENDPOINT
               valueFrom:
                 secretKeyRef:
                   name: bookit-secrets
-                  key: CLOUDFLARE_ACCOUNT_ID
+                  key: CLOUDFLARE_R2_ENDPOINT
+            - name: CLOUDFLARE_R2_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: bookit-secrets
+                  key: CLOUDFLARE_R2_BUCKET
             volumeMounts:
             - name: redis-data
               mountPath: /data

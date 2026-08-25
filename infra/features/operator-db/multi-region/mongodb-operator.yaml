@@ -11,7 +11,9 @@ spec:
     apply: 6.0-recommended
     schedule: "0 2 * * *"
   secrets:
-    users: backend-secrets
+    # Percona user-management keys are operator-specific; this is deliberately
+    # separate from the application's URL-based backend-secrets.
+    users: mongodb-operator-users
   replsets:
   - name: rs0
     size: 3 # Primary Region
@@ -34,10 +36,12 @@ spec:
       cloudflare-r2:
         type: s3
         s3:
-          bucket: bookit-db-backups
+          # Kustomize does not expand these tokens. Environment overlays must
+          # patch them with the non-secret R2 bucket and endpoint values.
+          bucket: "${CLOUDFLARE_R2_BUCKET}"
           credentialsSecret: bookit-secrets
           region: auto
-          endpointUrl: https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
+          endpointUrl: "${CLOUDFLARE_R2_ENDPOINT}"
           prefix: mongodb
     tasks:
       - name: daily-r2-backup

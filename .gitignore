@@ -2,6 +2,7 @@
 **/secret.env
 **/*.kubeconfig
 kubeconfig*
+.env.deployment
 
 # Legacy local-only files from the flat layout migration. Cluster-specific
 # ciphertext is committed only below apps/regions/*/*/secrets/.

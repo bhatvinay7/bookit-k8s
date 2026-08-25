@@ -65,7 +65,7 @@ Required repository or environment secrets:
 - `KUBECONFIG`: base64 or plaintext multi-context kubeconfig containing only
   the clusters for that environment.
 - `GHCR_PULL_TOKEN`: read-only package token used to produce `ghcr-secret`.
-- `DATABASE_URL`, `REPLICATION_URL`, `MONGO_DB_URL`, `REDIS_URL`,
+- `DATABASE_URL`, `REPLICATION_URL`, `MONGODB_URL`, `REDIS_URL`,
   `RABBITMQ_URL`, `GRPC_SERVER_URL`.
 - `SLOT_NAME`, `PUBLICATION`, `INVITATION_ENCRYPTION_KEY`.
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`,
@@ -74,8 +74,8 @@ Required repository or environment secrets:
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
   `CLOUDINARY_API_SECRET`.
 - `CLOUDFLARE_R2_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`,
-  `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET`,
-  `CLOUDFLARE_R2_PUBLIC_URL`.
+  `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ENDPOINT`,
+  `CLOUDFLARE_R2_BUCKET`, `CLOUDFLARE_R2_PUBLIC_URL`.
 - `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOCKET_URL` and the remaining frontend
   build-time secrets used by `.github/workflows/ci-cd.yaml`.
 
@@ -159,16 +159,22 @@ Recommended production topology:
   designed event flows. Do not stretch a normal quorum queue across high-latency
   regions.
 
-`infra/base/multi-region/postgres-operator.yaml` and
-`mongodb-operator.yaml` are database custom resources, not operator installers.
+`infra/features/operator-db/multi-region/postgres-operator.yaml` and
+`mongodb-operator.yaml` are optional database custom resources, not operator
+installers. The entire `infra/features/operator-db` package is excluded from the
+default base so managed cloud URLs do not accidentally compete with in-cluster
+databases.
 Install compatible CRDs/operators first and pin supported versions. Values such
-as `${CLOUDFLARE_ACCOUNT_ID}` inside a Kubernetes manifest are not expanded by
-Kustomize; replace them with operator-supported secret references or patches
-before enabling operator-managed R2 backups.
+as `${CLOUDFLARE_R2_ENDPOINT}` inside a Kubernetes manifest are not expanded by
+Kustomize; environment overlays must patch the non-secret endpoint and bucket
+fields before enabling operator-managed R2 backups. Credentials remain in the
+cluster-specific `bookit-secrets` SealedSecret. S3 tools receive AWS-named
+aliases derived from the canonical `CLOUDFLARE_R2_*` GitHub secrets.
 
-The existing `db-backup-cronjob.yaml` runs `pg_dump`/`mongodump` into ephemeral
-`/tmp` storage and currently has no upload command. It is **not a durable
-backup**. Do not consider database backup complete until all of these pass:
+`db-backup-cronjob.yaml` runs `pg_dump`/`mongodump` into a pod-local shared
+volume and uploads completed artifacts to Cloudflare R2 with rclone. This is a
+logical off-cluster copy, but it is not sufficient by itself. Do not consider
+database backup complete until all of these pass:
 
 - encrypted upload to an environment-specific, versioned R2 bucket;
 - separate prefixes for environment, cluster, database, and timestamp;

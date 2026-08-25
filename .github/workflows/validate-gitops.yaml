@@ -31,6 +31,7 @@ jobs:
             apps/regions/prod/eu-west
             infra/overlays/dev
             infra/overlays/prod
+            infra/features/operator-db
             infra/base/custom-db-ha
           )
           for target in "${targets[@]}"; do
