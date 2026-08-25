@@ -1,112 +1,122 @@
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-Failed to create stream fd: Operation not permitted
-# apiVersion: apps/v1
-# kind: StatefulSet
-# metadata:
-#   name: redis-ha
-#   namespace: bookit
-# spec:
-#   serviceName: "redis-ha-headless"
-#   replicas: 3
-#   selector:
-#     matchLabels:
-#       app: redis-ha
-#   template:
-#     metadata:
-#       labels:
-#         app: redis-ha
-#     spec:
-#       containers:
-#         - name: redis
-#           image: bitnami/redis:7.0
-#           env:
-#             - name: REDIS_PASSWORD
-#               value: "redispassword"
-#             - name: REDIS_REPLICATION_MODE
-#               value: "master" # Startup logic determines master/replica dynamically with Bitnami scripts
-#             - name: REDIS_MASTER_HOST
-#               value: "redis-ha-0.redis-ha-headless.bookit.svc.cluster.local"
-#           ports:
-#             - containerPort: 6379
-#           volumeMounts:
-#             - name: data
-#               mountPath: /bitnami/redis/data
-#         - name: sentinel
-#           image: bitnami/redis-sentinel:7.0
-#           env:
-#             - name: REDIS_MASTER_PASSWORD
-#               value: "redispassword"
-#             - name: REDIS_MASTER_HOST
-#               value: "redis-ha-0.redis-ha-headless.bookit.svc.cluster.local"
-#           ports:
-#             - containerPort: 26379
-#         # Metrics Exporter
-#         - name: metrics
-#           image: oliver006/redis_exporter:v1.52.0
-#           env:
-#             - name: REDIS_ADDR
-#               value: "redis://127.0.0.1:6379"
-#             - name: REDIS_PASSWORD
-#               value: "redispassword"
-#           ports:
-#             - containerPort: 9121
-#               name: metrics
-#   volumeClaimTemplates:
-#     - metadata:
-#         name: data
-#       spec:
-#         accessModes: [ "ReadWriteOnce" ]
-#         resources:
-#           requests:
-#             storage: 5Gi
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: redis-ha-headless
-#   namespace: bookit
-# spec:
-#   ports:
-#     - port: 6379
-#       name: redis
-#     - port: 26379
-#       name: sentinel
-#   clusterIP: None
-#   selector:
-#     app: redis-ha
-# ---
-# # Proxy: HAProxy to route to the healthy Redis master based on Sentinel checks
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: redis-proxy
-#   namespace: bookit
-# spec:
-#   replicas: 2
-#   selector:
-#     matchLabels:
-#       app: redis-proxy
-#   template:
-#     metadata:
-#       labels:
-#         app: redis-proxy
-#     spec:
-#       containers:
-#         - name: haproxy
-#           image: haproxy:2.4
-#           # In production, mount an HAProxy config map that uses tcp-check to find the master
-#           ports:
-#             - containerPort: 6379
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: redis-proxy
-#   namespace: bookit
-# spec:
-#   ports:
-#     - port: 6379
-#       targetPort: 6379
-#   selector:
-#     app: redis-proxy
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-ha
+  namespace: bookit
+spec:
+  serviceName: "redis-ha-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: redis-ha
+  template:
+    metadata:
+      labels:
+        app: redis-ha
+    spec:
+      containers:
+        - name: redis
+          image: bitnami/redis:7.0
+          command: ["/bin/bash", "-ec"]
+          args:
+            - |
+              if [[ "$(hostname)" == *-0 ]]; then
+                export REDIS_REPLICATION_MODE=master
+              else
+                export REDIS_REPLICATION_MODE=slave
+              fi
+              exec /opt/bitnami/scripts/redis/entrypoint.sh /opt/bitnami/scripts/redis/run.sh
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
+            - name: REDIS_MASTER_HOST
+              value: "redis-ha-0.redis-ha-headless.bookit.svc.cluster.local"
+            - name: REDIS_MASTER_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/redis/data
+        - name: sentinel
+          image: bitnami/redis-sentinel:7.0
+          env:
+            - name: REDIS_MASTER_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
+            - name: REDIS_MASTER_HOST
+              value: "redis-ha-0.redis-ha-headless.bookit.svc.cluster.local"
+          ports:
+            - containerPort: 26379
+        # Metrics Exporter
+        - name: metrics
+          image: oliver006/redis_exporter:v1.52.0
+          env:
+            - name: REDIS_ADDR
+              value: "redis://127.0.0.1:6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
+          ports:
+            - containerPort: 9121
+              name: metrics
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-ha-headless
+  namespace: bookit
+spec:
+  ports:
+    - port: 6379
+      name: redis
+    - port: 26379
+      name: sentinel
+  clusterIP: None
+  selector:
+    app: redis-ha
+---
+# Proxy: HAProxy to route to the healthy Redis master based on Sentinel checks
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-proxy
+  namespace: bookit
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis-proxy
+  template:
+    metadata:
+      labels:
+        app: redis-proxy
+    spec:
+      containers:
+        - name: haproxy
+          image: haproxy:2.4
+          # In production, mount an HAProxy config map that uses tcp-check to find the master
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-proxy
+  namespace: bookit
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis-proxy

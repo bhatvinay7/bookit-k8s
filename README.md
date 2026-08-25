@@ -168,6 +168,31 @@ Avoid running duplicate logical backup schedules against the same primary from
 every region. Elect one backup source and keep a second provider-native snapshot
 policy if available.
 
+### Optional custom database HA manifests
+
+`infra/base/custom-db-ha` is now a renderable, optional Kustomize package. It is
+not referenced by `infra/base/kustomization.yaml`, so normal dev/prod sync does
+not create these databases. Before enabling it, seal a `custom-db-ha-secrets`
+Secret in the target `bookit` namespace with these keys:
+
+- `mongodb-root-password`, `mongodb-replica-set-key`, `mongodb-exporter-uri`;
+- `postgres-admin-password`, `postgres-password`, `repmgr-password`,
+  `postgres-exporter-dsn`, `pgpool-admin-password`;
+- `rabbitmq-erlang-cookie`, `rabbitmq-username`, `rabbitmq-password`;
+- `redis-password`.
+
+Then render and server-dry-run it against a disposable cluster:
+
+```bash
+kubectl kustomize infra/base/custom-db-ha >/tmp/custom-db-ha.yaml
+kubectl apply --server-side --dry-run=server -f /tmp/custom-db-ha.yaml
+```
+
+Activate it only through a dedicated environment/region overlay after storage
+classes, anti-affinity, disruption budgets, backups, restore testing, and
+resource capacity have been approved. These StatefulSets provide in-cluster
+replication; they do not implement cross-region database synchronization.
+
 ## Global load balancing and failover
 
 ExternalDNS publishes Kubernetes ingress/service addresses; it does not provide

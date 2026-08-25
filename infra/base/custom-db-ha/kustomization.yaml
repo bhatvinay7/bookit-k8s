@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Optional self-hosted data plane. This directory is intentionally not
+# referenced by infra/base/kustomization.yaml.
+resources:
+- mongodb-ha.yaml
+- postgres-ha.yaml
+- rabbitmq-ha.yaml
+- redis-ha.yaml
+
+labels:
+- pairs:
+    app.kubernetes.io/part-of: bookit-custom-db-ha
+  includeSelectors: false
