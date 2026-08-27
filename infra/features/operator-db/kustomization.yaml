@@ -5,9 +5,12 @@ kind: Kustomization
 # when DATABASE_URL, MONGODB_URL, and REDIS_URL point to managed cloud services.
 # Install compatible CRDs/controllers and operator-specific Secrets first.
 resources:
+- https://download.elastic.co/downloads/eck/3.5.0/crds.yaml
+- https://download.elastic.co/downloads/eck/3.5.0/operator.yaml
 - multi-region/postgres-operator.yaml
 - multi-region/mongodb-operator.yaml
 - databases/redis-cluster.yaml
+- databases/elasticsearch.yaml
 
 labels:
 - pairs:

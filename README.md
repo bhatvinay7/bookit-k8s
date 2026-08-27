@@ -307,11 +307,21 @@ Recommended production topology:
 
 `infra/features/operator-db/multi-region/postgres-operator.yaml` and
 `mongodb-operator.yaml` are optional database custom resources, not operator
-installers. The entire `infra/features/operator-db` package is excluded from the
-default base so managed cloud URLs do not accidentally compete with in-cluster
-databases.
-Install compatible CRDs/operators first and pin supported versions. Values such
-as `${CLOUDFLARE_R2_ENDPOINT}` inside a Kubernetes manifest are not expanded by
+installers. Install their compatible operators before enabling the feature.
+The same package pins and installs the ECK 3.5.0 CRDs/operator and creates a
+three-node Elasticsearch 9.5.0 cluster with 50 GiB per node. ECK exposes it as
+`bookit-elasticsearch-es-http.bookit.svc.cluster.local:9200`. Internal HTTP TLS
+and Elasticsearch authentication are disabled because the current search
+client does not load an ECK CA or credentials; keep that Service cluster-only
+and enforce namespace NetworkPolicies. Enable ECK authentication and TLS before
+allowing any untrusted workload or external route to reach it.
+
+The entire `infra/features/operator-db` package is excluded from the default
+base so managed cloud URLs do not accidentally compete with in-cluster data
+services. Because the package installs cluster-scoped ECK CRDs and RBAC, its
+Argo CD application needs permission to manage cluster-scoped resources.
+Install compatible PostgreSQL, MongoDB, and Redis CRDs/operators first and pin
+supported versions. Values such as `${CLOUDFLARE_R2_ENDPOINT}` inside a Kubernetes manifest are not expanded by
 Kustomize; environment overlays must patch the non-secret endpoint and bucket
 fields before enabling operator-managed R2 backups. Credentials remain in the
 cluster-specific `bookit-secrets` SealedSecret. S3 tools receive AWS-named

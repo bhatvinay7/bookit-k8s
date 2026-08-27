@@ -1,0 +1,46 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: bookit-elasticsearch
+  namespace: bookit
+spec:
+  version: 9.5.0
+  http:
+    # The search server currently uses an unauthenticated cluster-local HTTP
+    # client. External access must remain blocked by NetworkPolicy/Ingress.
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+    - name: default
+      count: 3
+      config:
+        node.roles:
+          - master
+          - data
+          - ingest
+        node.store.allow_mmap: false
+        xpack.security.enabled: false
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              # Test profile, per Elasticsearch node. Three nodes can reserve
+              # 1.5 CPU/6 GiB and consume up to 6 CPU/12 GiB in total.
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 2Gi
+                limits:
+                  cpu: "2"
+                  memory: 4Gi
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            # Persistent test capacity per node (150 GiB total for 3 nodes).
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 50Gi
