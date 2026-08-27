@@ -51,6 +51,150 @@ The environment overlay owns image tags and environment configuration. A
 regional overlay adds `BOOKIT_REGION` and the SealedSecret ciphertext encrypted
 for that cluster.
 
+## Runtime and observability architecture
+
+Bookit uses regional, stateless application replicas in namespace `bookit` and
+cluster-local observability services in namespace `monitoring`. Argo CD applies
+the desired state; it is not in the request or telemetry data path.
+
+```mermaid
+flowchart LR
+    U[Browser and mobile clients] --> I[Regional ingress]
+    I --> G[Gateway keeper replicas]
+    G --> H[HTTP API replicas]
+    G --> S[Search gRPC replicas]
+    U --> W[Web and WebSocket replicas]
+    H --> PG[(PostgreSQL)]
+    H --> M[(MongoDB)]
+    H --> R[(Redis)]
+    G --> R
+    W --> R
+    H --> Q[(RabbitMQ)]
+    Q --> P[Payment and notification workers]
+
+    subgraph Node telemetry
+      C[/CRI container logs/]
+      F[Fluent Bit DaemonSet]
+      N[Node Exporter and kubelet]
+    end
+
+    subgraph Monitoring namespace
+      O[OTEL Collector replicas]
+      L[(Loki)]
+      T[(Tempo)]
+      PM[(Prometheus)]
+      GF[Grafana]
+    end
+
+    G & H & S & W & P -->|OTLP traces and metrics| O
+    G & H & S & W & P -->|JSON stdout/stderr| C
+    C --> F
+    F -->|OTLP HTTP logs| O
+    O -->|logs| L
+    O -->|traces| T
+    O -->|Prometheus endpoint| PM
+    N -->|node, pod and container CPU/memory| PM
+    L & T & PM --> GF
+```
+
+### Logs
+
+Rust services write one JSON object per line to standard output. Kubernetes'
+container runtime writes those records to `/var/log/containers`. One Fluent
+Bit pod runs on every node, tails the local CRI files, attaches pod, namespace,
+container, label and stream metadata, and forwards logs over OTLP HTTP to the
+collector. Fluent Bit uses a disk-backed tail database and filesystem buffering
+so a short collector outage does not immediately lose its read position.
+
+The collector applies memory limiting and batching before sending logs to Loki.
+Promtail is disabled deliberately: enabling Promtail and Fluent Bit together
+would ingest and bill for every log twice. Loki has a 50 GiB persistent volume
+in the baseline configuration. Log records must not contain credentials,
+tokens, payment data or raw personal information.
+
+### Traces
+
+Rust services initialize a shared OTLP tracer with `service.name`,
+`deployment.environment`, and `cloud.region` resource attributes. HTTP servers
+create spans around inbound requests, and the collector batches and retries
+exports to Tempo. Tempo is registered as a Grafana data source.
+
+W3C Trace Context is the propagation standard. Any new HTTP, gRPC, RabbitMQ or
+Redis-stream boundary must inject `traceparent` when sending and restore it when
+receiving. Database, cache, search and broker operations should create child
+spans named by system and operation—for example `db.system=postgresql` and
+`db.operation.name=SELECT`—without recording SQL parameters or secret-bearing
+URLs. The current shared setup guarantees request-level spans; complete
+driver-level query spans require wrapping each client operation or adopting a
+compatible instrumented client. Treat that as a release criterion before
+claiming complete query tracing.
+
+Tempo's baseline manifest uses node-local `/tmp` block and WAL storage. It is
+suitable for development and short-lived diagnostics, not durable production
+history. Production must move Tempo to object storage, run distributed
+components, and test retention and recovery.
+
+### Metrics and CPU monitoring
+
+`kube-prometheus-stack` installs Prometheus Operator, Node Exporter,
+kube-state-metrics and the normal Kubernetes scrape integrations. These provide
+host CPU, memory, disk and network metrics plus pod/container CPU throttling,
+working set, restarts and desired-versus-ready replica state. Metrics Server is
+separate: it supplies the live Resource Metrics API used by HPAs and
+`kubectl top`, but it does not retain historical Prometheus data.
+
+Applications export OTLP metrics to the collector. A dedicated ServiceMonitor
+scrapes the collector's port `8889`; Prometheus discovery is enabled across
+namespaces. Prefer OTLP application metrics for request rate, errors, latency,
+queue depth, lock contention and booking outcomes. Do not advertise a
+per-service `/metrics` endpoint unless that process actually serves it.
+
+### Scaling and capacity model
+
+There is no honest universal requests-per-second or telemetry-events-per-second
+number in source control: payload size, cardinality, sampling, node disk speed,
+database latency and retention all change capacity. The checked-in values are a
+safe baseline to load-test, not a throughput guarantee.
+
+| Layer | Horizontal unit | Baseline protection | Primary scale limit and control |
+|---|---|---|---|
+| Stateless API/gateway/search | Pod | CPU requests/limits and HPAs | Database pools and downstream latency; scale replicas only with matching connection budgets |
+| WebSocket | Pod | Regional Redis coordination | Open connections, file descriptors and reconnect storms; use connection-aware load tests and graceful draining |
+| Workers | Pod/consumer | RabbitMQ durability and bounded concurrency | Queue lag and downstream write rate; scale on queue depth, not CPU alone |
+| Fluent Bit | One pod per node | 50 MiB memory buffer plus node-local filesystem backlog | Per-node log bytes/sec and disk; enforce log levels, rotation and payload limits |
+| OTEL Collector | Two replicas | 1 GiB limit each, 768 MiB limiter, 2,048-item batches, 10,000-item trace queues | Signal bytes/sec and exporter latency; shard or autoscale collectors and watch refused/dropped telemetry |
+| Prometheus | One stack per cluster | 15-day retention | Active series × scrape frequency × retention; control labels/cardinality, add persistent storage, then shard or use remote-write |
+| Loki | Single persistent baseline | 50 GiB PVC | Compressed log bytes/day × retention; move to object storage and distributed Loki before sustained high volume |
+| Tempo | Single ephemeral baseline | Batched collector exports | Spans/sec × average span size × retention; add sampling and object-backed distributed Tempo |
+
+Capacity planning starts with measurements. Load-test expected peak traffic plus
+failure bursts, then record: request and error rate, p95/p99 latency, active
+Prometheus series, OTLP accepted/refused/dropped items, collector queue use,
+Fluent Bit retry backlog, Loki bytes/day, Tempo spans/sec, queue lag, database
+connections, CPU throttling and memory working set. Keep at least 30% headroom at
+the tested peak and alert before queues or storage reach their hard limits.
+
+Control observability growth with these rules:
+
+- never use user IDs, order IDs, URLs with identifiers, or unbounded error text
+  as Prometheus labels;
+- sample successful high-volume traces while retaining errors and slow traces;
+- set environment-specific log levels and rate-limit repetitive errors;
+- separate development and production retention and storage;
+- use object storage and multi-replica Loki/Tempo components before calling the
+  stack highly available;
+- alert on telemetry refusal/drop counters, not only application health.
+
+### Failure behavior
+
+Application requests do not synchronously depend on Loki, Tempo or Prometheus.
+If the collector is unavailable, Fluent Bit buffers logs on the node and OTLP
+SDK/collector queues absorb bounded bursts; once those bounds are exhausted,
+telemetry is dropped rather than blocking booking traffic. Prometheus continues
+scraping node and Kubernetes metrics independently. A node loss can still lose
+that node's unsent Fluent Bit backlog, and the baseline Tempo storage is lost
+with its pod, which is why remote durable storage is required for production.
+
 ## GitHub environments and secrets
 
 Create two GitHub environments in the **bookit application repository**:
