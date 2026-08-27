@@ -8,7 +8,6 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/websocket-services: "ws-server"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
@@ -27,9 +26,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: http-server
+                name: gateway-keeper
                 port:
-                  number: 3002
+                  number: 8080
     - host: ws.boookit.shop
       http:
         paths:
