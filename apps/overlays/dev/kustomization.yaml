@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - ../../base
+- keda-workers.yaml
 
 namespace: bookit
 
@@ -19,6 +20,7 @@ labels:
   includeSelectors: false
 
 patches:
+- path: delete-worker-hpas.yaml
 - target:
     kind: Ingress
     name: bookit-ingress

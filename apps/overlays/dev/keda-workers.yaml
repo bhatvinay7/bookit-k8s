@@ -1,0 +1,96 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-trigger-auth
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  secretTargetRef:
+  - parameter: host
+    name: backend-secrets
+    key: RABBITMQ_URL
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: lock-server-rabbitmq
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  scaleTargetRef:
+    name: lock-server
+  pollingInterval: 10
+  cooldownPeriod: 180
+  minReplicaCount: 1
+  maxReplicaCount: 2
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+  triggers:
+  - type: rabbitmq
+    metadata:
+      protocol: amqp
+      queueName: locking_queue
+      mode: QueueLength
+      value: "20"
+      activationValue: "1"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-processor-rabbitmq
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  scaleTargetRef:
+    name: payment-processor
+  pollingInterval: 10
+  cooldownPeriod: 300
+  minReplicaCount: 1
+  maxReplicaCount: 2
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+  triggers:
+  - type: rabbitmq
+    metadata:
+      protocol: amqp
+      queueName: payment_processing
+      mode: QueueLength
+      value: "5"
+      activationValue: "1"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: notification-worker-rabbitmq
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  scaleTargetRef:
+    name: notification-worker
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 1
+  maxReplicaCount: 2
+  fallback:
+    failureThreshold: 3
+    replicas: 1
+  triggers:
+  - type: rabbitmq
+    metadata:
+      protocol: amqp
+      queueName: notification_queue
+      mode: QueueLength
+      value: "20"
+      activationValue: "1"
+    authenticationRef:
+      name: rabbitmq-trigger-auth
