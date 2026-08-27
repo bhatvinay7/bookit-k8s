@@ -6,12 +6,10 @@ metadata:
     app: chess
 data:
   # App configs
-  HTTP_PORT: "3002"
-  WS_PORT: "8080"
+  HTTP_PORT: "8082"
+  WS_PORT: "8081"
   GRPC_PORT: "50051"
   METRICS_PORT: "9100"
   LOG_LEVEL: "info"
   NODE_ENV: "production"
-  BOOKIT_ENVIRONMENT: "base"
-  BOOKIT_REGION: "unset"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"
