@@ -141,7 +141,7 @@ names, cluster URLs, or plaintext Kubernetes Secrets.
 
 The environment overlays import `apps/base` and modify environment-wide state:
 
-- `NODE_ENV` and `BOOKIT_ENVIRONMENT`;
+- non-secret values such as `NODE_ENV`;
 - development ingress hostnames and TLS secret names;
 - labels used to distinguish telemetry and ownership;
 - image tags or production image digests written by automation.
@@ -150,10 +150,14 @@ The environment overlays import `apps/base` and modify environment-wide state:
 
 Regional overlays import their environment overlay and add:
 
-- `BOOKIT_REGION`;
 - a region label;
 - the `secrets/` Kustomization containing ciphertext encrypted for exactly that
   cluster's Sealed Secrets controller.
+
+The deployment workflow passes the selected GitHub environment and each
+`DEPLOY_REGIONS` entry to `seal-cluster-secrets.sh`. The script derives and
+seals `BOOKIT_ENVIRONMENT` and `BOOKIT_REGION`; they are not separately entered
+as GitHub secrets and are never stored in a ConfigMap.
 
 Regional overlays are siblings of environment overlays. They cannot live below
 the environment directory while importing it because that produces a Kustomize

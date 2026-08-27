@@ -42,6 +42,8 @@ spec:
             envFrom:
             - configMapRef:
                 name: bookit-config
+            - secretRef:
+                name: bookit-secrets
             env:
             - name: CLOUDFLARE_R2_BUCKET
               valueFrom:
@@ -113,6 +115,8 @@ spec:
             envFrom:
             - configMapRef:
                 name: bookit-config
+            - secretRef:
+                name: bookit-secrets
             env:
             - name: CLOUDFLARE_R2_BUCKET
               valueFrom:

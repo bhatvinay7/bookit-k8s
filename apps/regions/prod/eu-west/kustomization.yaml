@@ -5,12 +5,6 @@ resources:
 - ../../../overlays/prod
 - secrets
 
-configMapGenerator:
-- name: bookit-config
-  behavior: merge
-  literals:
-  - BOOKIT_REGION=eu-west
-
 labels:
 - pairs:
     bookit.io/region: eu-west

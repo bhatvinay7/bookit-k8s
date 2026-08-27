@@ -22,6 +22,11 @@ spec:
             name: bookit-config
         image: ghcr.io/bhatvinay7/bookit-search-server:latest
         name: search-server
+        ports:
+        - containerPort: 8084
+          name: http
+        - containerPort: 50051
+          name: grpc
         resources:
           limits:
             cpu: 200m
@@ -32,6 +37,23 @@ spec:
       imagePullSecrets:
       - name: ghcr-secret
       serviceAccountName: bookit-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: search-server
+  name: search-server
+spec:
+  ports:
+  - name: http
+    port: 8084
+    targetPort: 8084
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    app: search-server
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

@@ -47,9 +47,11 @@ argocd/prod-apps.yaml                  Argo CD prod ApplicationSets
 scripts/seal-cluster-secrets.sh        cluster-specific secret sealing
 ```
 
-The environment overlay owns image tags and environment configuration. A
-regional overlay adds `BOOKIT_REGION` and the SealedSecret ciphertext encrypted
-for that cluster.
+The environment overlay owns image tags and non-secret environment
+configuration. CI derives `BOOKIT_ENVIRONMENT` and `BOOKIT_REGION` from the
+selected GitHub environment and regional deployment matrix, then seals both
+values into each cluster's runtime Secrets. A regional overlay contains only
+the region label and SealedSecret ciphertext encrypted for that cluster.
 
 ## Runtime and observability architecture
 

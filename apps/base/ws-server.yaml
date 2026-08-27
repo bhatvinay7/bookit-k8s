@@ -23,7 +23,8 @@ spec:
         image: bookit-ws-server:latest
         name: ws-server
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
+          name: http
         resources:
           limits:
             cpu: 200m
@@ -44,8 +45,8 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 8080
-    targetPort: 8080
+    port: 8081
+    targetPort: 8081
   selector:
     app: ws-server
   type: ClusterIP

@@ -25,7 +25,8 @@ spec:
         image: bookit-http-server:latest
         name: http-server
         ports:
-        - containerPort: 3002
+        - containerPort: 8082
+          name: http
         resources:
           limits:
             cpu: 200m
@@ -46,8 +47,8 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 3002
-    targetPort: 3002
+    port: 8082
+    targetPort: 8082
   selector:
     app: http-server
   type: ClusterIP

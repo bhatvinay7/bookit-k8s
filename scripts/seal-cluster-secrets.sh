@@ -71,6 +71,8 @@ seal() {
 }
 
 seal backend-secrets sealed-backend-secrets.yaml \
+  --from-literal=BOOKIT_ENVIRONMENT="$environment" \
+  --from-literal=BOOKIT_REGION="$region" \
   --from-literal=DATABASE_URL="$DATABASE_URL" \
   --from-literal=REPLICATION_URL="$REPLICATION_URL" \
   --from-literal=MONGODB_URL="$MONGODB_URL" \
@@ -110,6 +112,8 @@ seal backend-secrets sealed-backend-secrets.yaml \
   --from-literal=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
 seal frontend-secrets sealed-frontend-secrets.yaml \
+  --from-literal=BOOKIT_ENVIRONMENT="$environment" \
+  --from-literal=BOOKIT_REGION="$region" \
   --from-literal=NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
   --from-literal=NEXT_PUBLIC_SOCKET_URL="$NEXT_PUBLIC_SOCKET_URL" \
   --from-literal=NEXT_PUBLIC_WS_BASE_URL="$NEXT_PUBLIC_WS_BASE_URL" \
@@ -121,6 +125,8 @@ seal frontend-secrets sealed-frontend-secrets.yaml \
   --from-literal=NEXT_PUBLIC_USE_REMOTE_STOCKFISH="$NEXT_PUBLIC_USE_REMOTE_STOCKFISH"
 
 seal bookit-secrets sealed-platform-secrets.yaml \
+  --from-literal=BOOKIT_ENVIRONMENT="$environment" \
+  --from-literal=BOOKIT_REGION="$region" \
   --from-literal=CLOUDFLARE_R2_ACCOUNT_ID="$CLOUDFLARE_R2_ACCOUNT_ID" \
   --from-literal=CLOUDFLARE_R2_ACCESS_KEY_ID="$CLOUDFLARE_R2_ACCESS_KEY_ID" \
   --from-literal=CLOUDFLARE_R2_SECRET_ACCESS_KEY="$CLOUDFLARE_R2_SECRET_ACCESS_KEY" \
