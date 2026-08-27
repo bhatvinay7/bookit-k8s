@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: bookit-observability
+spec:
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  selector:
+    matchLabels:
+      app: otel-collector
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: otel-collector

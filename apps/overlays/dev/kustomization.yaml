@@ -63,3 +63,35 @@ patches:
     - op: replace
       path: /spec/tls/0/secretName
       value: grpc-dev-boookit-shop-tls
+
+# Test-server resource profile. This patch applies uniformly to every Bookit
+# Deployment in the development overlay; production retains the base sizing.
+- target:
+    kind: Deployment
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 250m
+          memory: 384Mi
+          ephemeral-storage: 1Gi
+
+# A test cluster may burst to two pods per workload without allowing a noisy
+# service to consume the complete node.
+- target:
+    kind: HorizontalPodAutoscaler
+  patch: |-
+    - op: replace
+      path: /spec/minReplicas
+      value: 1
+    - op: replace
+      path: /spec/maxReplicas
+      value: 2

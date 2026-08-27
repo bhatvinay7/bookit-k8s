@@ -5,6 +5,9 @@ resources:
   - custom-db-ha/rabbitmq-ha.yaml
   - databases/db-backup-cronjob.yaml
   - monitoring/prometheus-grafana.yaml
+  - monitoring/loki-stack.yaml
+  - monitoring/fluent-bit.yaml
   - monitoring/otel-collector.yaml
+  - monitoring/otel-collector-monitor.yaml
   - monitoring/tempo.yaml
   - multi-region/external-dns.yaml

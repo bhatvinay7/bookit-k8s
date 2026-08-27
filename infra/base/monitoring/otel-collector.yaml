@@ -6,7 +6,7 @@ metadata:
   labels:
     app: otel-collector
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: otel-collector
@@ -27,6 +27,22 @@ spec:
             - containerPort: 4317 # OTLP gRPC receiver
             - containerPort: 4318 # OTLP http receiver
             - containerPort: 8889 # Prometheus exporter metrics
+            - containerPort: 13133 # Collector health endpoint
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 13133
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 13133
       volumes:
         - name: otel-collector-config-vol
           configMap:
@@ -46,27 +62,59 @@ data:
           http:
 
     processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 768
+        spike_limit_mib: 192
+      resource:
+        attributes:
+          - key: k8s.cluster.name
+            value: bookit
+            action: upsert
       batch:
+        send_batch_size: 2048
+        timeout: 5s
 
     exporters:
       prometheus:
         endpoint: "0.0.0.0:8889"
         namespace: "bookit"
+        resource_to_telemetry_conversion:
+          enabled: true
       otlp/tempo:
         endpoint: "tempo.monitoring.svc.cluster.local:4317"
         tls:
           insecure: true
+        sending_queue:
+          enabled: true
+          queue_size: 10000
+        retry_on_failure:
+          enabled: true
+      loki:
+        endpoint: "http://loki-stack.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+        default_labels_enabled:
+          exporter: false
+          job: true
+
+    extensions:
+      health_check:
+        endpoint: "0.0.0.0:13133"
 
     service:
+      extensions: [health_check]
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, resource, batch]
           exporters: [otlp/tempo]
         metrics:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, resource, batch]
           exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [loki]
 ---
 apiVersion: v1
 kind: Service
@@ -86,5 +134,8 @@ spec:
     - name: metrics
       port: 8889
       targetPort: 8889
+    - name: health
+      port: 13133
+      targetPort: 13133
   selector:
     app: otel-collector

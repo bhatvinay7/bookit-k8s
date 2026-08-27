@@ -12,10 +12,6 @@ spec:
       app: lock-server
   template:
     metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: '80'
-        prometheus.io/scrape: 'true'
       labels:
         app: lock-server
     spec:
