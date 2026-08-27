@@ -38,7 +38,7 @@ spec:
               service:
                 name: ws-server
                 port:
-                  number: 8080
+                  number: 8081
     - host: web.boookit.shop
       http:
         paths:
