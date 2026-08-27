@@ -7,3 +7,173 @@ labels:
 - pairs:
     bookit.io/environment: dev
   includeSelectors: false
+
+patches:
+# Test-server sizing for the plain infrastructure Deployments: ExternalDNS,
+# Metrics Server, OTEL Collector and Tempo.
+- target:
+    kind: Deployment
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 250m
+          memory: 384Mi
+          ephemeral-storage: 1Gi
+
+# The collector's configured memory limiter is 768 MiB, so its container limit
+# must remain above that threshold even on the test cluster.
+- target:
+    kind: Deployment
+    name: otel-collector
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+          ephemeral-storage: 1Gi
+
+# One RabbitMQ replica is sufficient for functional testing. It is deliberately
+# not highly available and must never be promoted as production configuration.
+- target:
+    kind: StatefulSet
+    name: rabbitmq-ha
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: add
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 500m
+          memory: 768Mi
+          ephemeral-storage: 1Gi
+    - op: replace
+      path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+      value: 2Gi
+
+- target:
+    kind: DaemonSet
+    name: fluent-bit
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 150m
+          memory: 192Mi
+          ephemeral-storage: 1Gi
+
+# Both backup pods have a dump container and an R2 upload sidecar. The 2 GiB
+# emptyDir is a test bound; larger test datasets require an explicit increase.
+- target:
+    kind: CronJob
+  patch: |-
+    - op: add
+      path: /spec/jobTemplate/spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+          ephemeral-storage: 128Mi
+        limits:
+          cpu: 250m
+          memory: 384Mi
+          ephemeral-storage: 2Gi
+    - op: add
+      path: /spec/jobTemplate/spec/template/spec/containers/1/resources
+      value:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+          ephemeral-storage: 64Mi
+        limits:
+          cpu: 150m
+          memory: 192Mi
+          ephemeral-storage: 512Mi
+    - op: add
+      path: /spec/jobTemplate/spec/template/spec/volumes/0/emptyDir/sizeLimit
+      value: 2Gi
+
+# Helm parameters override only development sizing while preserving the base
+# chart configuration and Grafana/Tempo data-source wiring.
+- target:
+    kind: Application
+    name: kube-prometheus-stack
+  patch: |-
+    - op: add
+      path: /spec/source/helm/parameters
+      value:
+        - name: prometheus.prometheusSpec.retention
+          value: 3d
+        - name: prometheus.prometheusSpec.resources.requests.cpu
+          value: 100m
+        - name: prometheus.prometheusSpec.resources.requests.memory
+          value: 256Mi
+        - name: prometheus.prometheusSpec.resources.limits.cpu
+          value: 500m
+        - name: prometheus.prometheusSpec.resources.limits.memory
+          value: 768Mi
+        - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage
+          value: 5Gi
+        - name: grafana.resources.requests.cpu
+          value: 50m
+        - name: grafana.resources.requests.memory
+          value: 128Mi
+        - name: grafana.resources.limits.cpu
+          value: 250m
+        - name: grafana.resources.limits.memory
+          value: 256Mi
+        - name: grafana.persistence.enabled
+          value: "true"
+        - name: grafana.persistence.size
+          value: 2Gi
+        - name: alertmanager.alertmanagerSpec.resources.requests.cpu
+          value: 25m
+        - name: alertmanager.alertmanagerSpec.resources.requests.memory
+          value: 64Mi
+        - name: alertmanager.alertmanagerSpec.resources.limits.cpu
+          value: 100m
+        - name: alertmanager.alertmanagerSpec.resources.limits.memory
+          value: 128Mi
+
+- target:
+    kind: Application
+    name: loki-stack
+  patch: |-
+    - op: add
+      path: /spec/source/helm/parameters
+      value:
+        - name: loki.persistence.size
+          value: 5Gi
+        - name: loki.resources.requests.cpu
+          value: 50m
+        - name: loki.resources.requests.memory
+          value: 128Mi
+        - name: loki.resources.limits.cpu
+          value: 250m
+        - name: loki.resources.limits.memory
+          value: 384Mi

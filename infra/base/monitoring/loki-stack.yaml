@@ -18,10 +18,13 @@ spec:
         loki:
           enabled: true
           isDefault: true
+          persistence:
+            enabled: true
+            size: 50Gi
         promtail:
-          enabled: true
-          config:
-            lokiAddress: http://{{ .Release.Name }}:3100/loki/api/v1/push
+          # Fluent Bit owns the node log tailing path. Running both agents would
+          # duplicate every container log in Loki.
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

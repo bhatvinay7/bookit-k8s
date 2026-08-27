@@ -11,10 +11,6 @@ spec:
       app: ws-server
   template:
     metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: '8080'
-        prometheus.io/scrape: 'true'
       labels:
         app: ws-server
     spec:

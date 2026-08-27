@@ -406,17 +406,17 @@ manages it, remove the GitOps copy to avoid duplicate APIService ownership.
 
 ### Prometheus and Grafana
 
-The Prometheus/Grafana Argo Application installs `kube-prometheus-stack`. The
-Bookit `ServiceMonitor` discovers Services with an `app` label and scrapes the
-named `http` port at `/metrics` every 15 seconds.
-
-Verify every selected Service actually exposes metrics on a port named `http`.
-A broad selector can discover non-metric Services, creating noisy scrape errors.
-A dedicated label such as `monitoring.bookit.io/scrape=true` is safer.
+The Prometheus/Grafana Argo Application installs `kube-prometheus-stack`, which
+collects node, kubelet/container, and Kubernetes object metrics. Applications
+export metrics over OTLP. The collector exposes the transformed series on port
+`8889`, and the dedicated collector `ServiceMonitor` scrapes it every 15
+seconds. Do not add application scrape annotations unless that process really
+implements an HTTP `/metrics` endpoint.
 
 ### Logs and traces
 
-- Loki/Promtail collects container logs.
+- Fluent Bit tails CRI container logs on every node, enriches them with
+  Kubernetes metadata, and forwards them through the collector to Loki.
 - Applications send OTLP data to `otel-collector.monitoring:4317`.
 - The collector exports traces to Tempo and exposes transformed metrics for
   Prometheus.

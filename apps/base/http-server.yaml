@@ -11,10 +11,6 @@ spec:
       app: http-server
   template:
     metadata:
-      annotations:
-        prometheus.io/path: /metrics
-        prometheus.io/port: '3002'
-        prometheus.io/scrape: 'true'
       labels:
         app: http-server
     spec:

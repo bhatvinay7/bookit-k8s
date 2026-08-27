@@ -13,7 +13,6 @@ resources:
 - payment-processor.yaml
 - search-server.yaml
 - web.yaml
-- service-monitor.yaml
 - ingress.yaml
 - grpc-ingress.yaml
 
