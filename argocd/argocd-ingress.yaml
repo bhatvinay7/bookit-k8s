@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - argocd.chesscounty.life
-      secretName: argocd-server-tls
+        - argocd.boookit.shop
+      secretName: argocd-boookit-shop-tls
   rules:
-    - host: argocd.chesscounty.life
+    - host: argocd.boookit.shop
       http:
         paths:
           - path: /

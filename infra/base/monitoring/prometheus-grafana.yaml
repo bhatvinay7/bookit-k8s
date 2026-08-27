@@ -23,11 +23,11 @@ spec:
               cert-manager.io/cluster-issuer: "letsencrypt-prod"
               nginx.ingress.kubernetes.io/ssl-redirect: "true"
             hosts:
-              - grafana.chesscounty.life
+              - grafana.boookit.shop
             tls:
-              - secretName: grafana-chesscounty-life-tls
+              - secretName: grafana-boookit-shop-tls
                 hosts:
-                  - grafana.chesscounty.life
+                  - grafana.boookit.shop
           sidecar:
             dashboards:
               enabled: true
