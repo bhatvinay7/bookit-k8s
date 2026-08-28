@@ -345,12 +345,18 @@ Avoid running duplicate logical backup schedules against the same primary from
 every region. Elect one backup source and keep a second provider-native snapshot
 policy if available.
 
-### Optional custom database HA manifests
+### Stateful Services Helm Chart
 
-`infra/base/custom-db-ha` is now a renderable, optional Kustomize package. It is
-not referenced by `infra/base/kustomization.yaml`, so normal dev/prod sync does
-not create these databases. Before enabling it, seal a `custom-db-ha-secrets`
-Secret in the target `bookit` namespace with these keys:
+`charts/stateful-services` is a dynamic Helm chart that handles database deployments across single or multi-region setups. It is deployed automatically via the `argocd/stateful-applicationset.yaml` ArgoCD ApplicationSet.
+
+This architecture offers granular cloud provider controls:
+- **Redis & RabbitMQ:** Always deploy locally as custom highly-available StatefulSets.
+- **PostgreSQL & MongoDB:** Evaluated dynamically based on your environment's cloud preference. If `USE_CLOUD_PROVIDER` is true, the chart provisions an `ExternalName` Service proxying traffic to your SaaS databases. If false, it falls back to custom in-cluster StatefulSet deployments.
+
+**Integrated S3 Backups:**
+When PostgreSQL or MongoDB are deployed as custom resources (i.e. `useCloudProvider=false`), the Helm chart automatically injects `postgres-backup` and `mongodb-backup` CronJobs. These run daily and use `rclone` to back up database dumps directly to your Cloudflare R2 bucket (`CLOUDFLARE_R2_BUCKET`), leveraging the secrets injected from your `bookit-secrets` SealedSecret.
+
+Before using custom deployments, ensure you seal a `custom-db-ha-secrets` Secret in the target `bookit` namespace with these keys:
 
 - `mongodb-root-password`, `mongodb-replica-set-key`, `mongodb-exporter-uri`;
 - `postgres-admin-password`, `postgres-password`, `repmgr-password`,
@@ -358,17 +364,8 @@ Secret in the target `bookit` namespace with these keys:
 - `rabbitmq-erlang-cookie`, `rabbitmq-username`, `rabbitmq-password`;
 - `redis-password`.
 
-Then render and server-dry-run it against a disposable cluster:
-
-```bash
-kubectl kustomize infra/base/custom-db-ha >/tmp/custom-db-ha.yaml
-kubectl apply --server-side --dry-run=server -f /tmp/custom-db-ha.yaml
-```
-
-Activate it only through a dedicated environment/region overlay after storage
-classes, anti-affinity, disruption budgets, backups, restore testing, and
-resource capacity have been approved. These StatefulSets provide in-cluster
-replication; they do not implement cross-region database synchronization.
+**Multi-Region Behavior:**
+If multi-region is enabled, ArgoCD automatically labels and targets both primary and secondary clusters, creating independent database instances in each region. If disabled, it targets only the primary cluster. Wait for `deploy-stateful-services` to apply successfully before routing traffic.
 
 ## Global load balancing and failover
 
