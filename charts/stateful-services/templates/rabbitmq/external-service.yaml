@@ -1,4 +1,4 @@
-{{ if .Values.global.useCloudProvider }}
+{{ if .Values.rabbitmq.useCloudProvider }}
 apiVersion: v1
 kind: Service
 metadata:

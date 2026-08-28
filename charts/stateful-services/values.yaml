@@ -3,7 +3,18 @@
 global:
   multiRegion:
     enabled: false
-  useCloudProvider: false
   primaryRegion: "us-east"
   secondaryRegion: "eu-west"
   currentRegion: "us-east"
+
+postgres:
+  useCloudProvider: true
+
+mongodb:
+  useCloudProvider: true
+
+redis:
+  useCloudProvider: false
+
+rabbitmq:
+  useCloudProvider: false

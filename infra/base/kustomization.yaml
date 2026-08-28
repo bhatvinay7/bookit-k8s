@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - metrics-server.yaml
   - custom-db-ha/rabbitmq-ha.yaml
-  - databases/db-backup-cronjob.yaml
+
   - monitoring/prometheus-grafana.yaml
   - monitoring/loki-stack.yaml
   - monitoring/fluent-bit.yaml

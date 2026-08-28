@@ -1,4 +1,4 @@
-{{ if not .Values.global.useCloudProvider }}
+{{ if not .Values.redis.useCloudProvider }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
