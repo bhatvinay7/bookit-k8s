@@ -14,10 +14,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - grpc.boookit.shop
+        - grpc.bookit4u.shop
       secretName: grpc-boookit-shop-tls
   rules:
-    - host: grpc.boookit.shop
+    - host: grpc.bookit4u.shop
       http:
         paths:
           - path: /

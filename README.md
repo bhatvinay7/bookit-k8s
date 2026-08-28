@@ -373,9 +373,9 @@ authoritative DNS health-check service in front of regional ingress endpoints.
 
 Use these pools:
 
-- development: `dev.boookit.shop` -> dev US ingress only;
-- production primary: `boookit.shop`, `api.boookit.shop`,
-  `ws.boookit.shop`, `grpc.boookit.shop` -> US pool;
+- development: `dev.bookit4u.shop` -> dev US ingress only;
+- production primary: `bookit4u.shop`, `api.bookit4u.shop`,
+  `ws.bookit4u.shop`, `grpc.bookit4u.shop` -> US pool;
 - production failover: the same hostnames -> EU pool after health checks fail.
 
 Use `/health` or `/readyz` endpoints that test required dependencies without

@@ -27,22 +27,22 @@ patches:
   patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0
-      value: api.dev.boookit.shop
+      value: api.dev.bookit4u.shop
     - op: replace
       path: /spec/tls/0/hosts/1
-      value: ws.dev.boookit.shop
+      value: ws.dev.bookit4u.shop
     - op: replace
       path: /spec/tls/0/hosts/2
-      value: dev.boookit.shop
+      value: dev.bookit4u.shop
     - op: replace
       path: /spec/rules/0/host
-      value: api.dev.boookit.shop
+      value: api.dev.bookit4u.shop
     - op: replace
       path: /spec/rules/1/host
-      value: ws.dev.boookit.shop
+      value: ws.dev.bookit4u.shop
     - op: replace
       path: /spec/rules/2/host
-      value: dev.boookit.shop
+      value: dev.bookit4u.shop
     - op: remove
       path: /spec/rules/3
     - op: remove
@@ -57,10 +57,10 @@ patches:
   patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0
-      value: grpc.dev.boookit.shop
+      value: grpc.dev.bookit4u.shop
     - op: replace
       path: /spec/rules/0/host
-      value: grpc.dev.boookit.shop
+      value: grpc.dev.bookit4u.shop
     - op: replace
       path: /spec/tls/0/secretName
       value: grpc-dev-boookit-shop-tls

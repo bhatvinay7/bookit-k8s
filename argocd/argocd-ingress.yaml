@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - argocd.boookit.shop
+        - argocd.bookit4u.shop
       secretName: argocd-boookit-shop-tls
   rules:
-    - host: argocd.boookit.shop
+    - host: argocd.bookit4u.shop
       http:
         paths:
           - path: /

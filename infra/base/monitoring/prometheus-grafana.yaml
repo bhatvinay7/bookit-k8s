@@ -23,11 +23,11 @@ spec:
               cert-manager.io/cluster-issuer: "letsencrypt-prod"
               nginx.ingress.kubernetes.io/ssl-redirect: "true"
             hosts:
-              - grafana.boookit.shop
+              - grafana.bookit4u.shop
             tls:
               - secretName: grafana-boookit-shop-tls
                 hosts:
-                  - grafana.boookit.shop
+                  - grafana.bookit4u.shop
           sidecar:
             dashboards:
               enabled: true
