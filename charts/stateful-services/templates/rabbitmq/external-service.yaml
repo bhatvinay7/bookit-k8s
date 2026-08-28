@@ -1,0 +1,10 @@
+{{ if .Values.global.useCloudProvider }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-proxy
+  namespace: bookit
+spec:
+  type: ExternalName
+  externalName: {{ if and .Values.global.multiRegion.enabled (eq .Values.global.currentRegion .Values.global.secondaryRegion) }}replica.rabbitmq.cloud.bookit.com{{ else }}primary.rabbitmq.cloud.bookit.com{{ end }}
+{{ end }}

@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: stateful-services
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            deploy-stateful-services: "true"
+  template:
+    metadata:
+      name: '{{name}}-stateful-services'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/bhatvinay7/bookit-k8s.git'
+        targetRevision: HEAD
+        path: charts/stateful-services
+        helm:
+          values: |
+            global:
+              multiRegion:
+                enabled: {{metadata.labels.multi_region_enabled}}
+              useCloudProvider: {{metadata.labels.use_cloud_provider}}
+              primaryRegion: {{metadata.labels.primary_region}}
+              secondaryRegion: {{metadata.labels.secondary_region}}
+              currentRegion: {{metadata.labels.region}}
+      destination:
+        server: '{{server}}'
+        namespace: bookit
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,105 @@
+{{ if not .Values.global.useCloudProvider }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-ha
+  namespace: bookit
+spec:
+  serviceName: "mongodb-ha-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongodb-ha
+  template:
+    metadata:
+      labels:
+        app: mongodb-ha
+    spec:
+      containers:
+        - name: mongodb
+          image: bitnami/mongodb:6.0
+          command: ["/bin/bash", "-ec"]
+          args:
+            - |
+              if [[ "$(hostname)" == *-0 ]]; then
+                export MONGODB_REPLICA_SET_MODE=primary
+              else
+                export MONGODB_REPLICA_SET_MODE=secondary
+              fi
+              exec /opt/bitnami/scripts/mongodb/entrypoint.sh /opt/bitnami/scripts/mongodb/run.sh
+          env:
+            - name: MONGODB_REPLICA_SET_NAME
+              value: "rs0"
+            - name: MONGODB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: custom-db-ha-secrets
+                  key: mongodb-root-password
+            - name: MONGODB_REPLICA_SET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: custom-db-ha-secrets
+                  key: mongodb-replica-set-key
+            - name: MONGODB_INITIAL_PRIMARY_HOST
+              value: "mongodb-ha-0.mongodb-ha-headless.bookit.svc.cluster.local"
+            - name: MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: custom-db-ha-secrets
+                  key: mongodb-root-password
+            - name: MONGODB_ADVERTISED_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/mongodb
+        # Metrics Exporter
+        - name: metrics
+          image: percona/mongodb_exporter:2.37
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: custom-db-ha-secrets
+                  key: mongodb-exporter-uri
+          ports:
+            - containerPort: 9216
+              name: metrics
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-ha-headless
+  namespace: bookit
+spec:
+  ports:
+    - port: 27017
+      name: mongodb
+  clusterIP: None
+  selector:
+    app: mongodb-ha
+---
+# Standard Service for clients to connect (Clients must specify replicaSet=rs0 in connection string)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-proxy
+  namespace: bookit
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  selector:
+    app: mongodb-ha
+{{ end }}

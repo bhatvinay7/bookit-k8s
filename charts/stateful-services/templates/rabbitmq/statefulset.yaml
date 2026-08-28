@@ -1,0 +1,88 @@
+{{ if not .Values.global.useCloudProvider }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq-ha
+  namespace: bookit
+spec:
+  serviceName: "rabbitmq-ha-headless"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rabbitmq-ha
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-ha
+    spec:
+      containers:
+        - name: rabbitmq
+          image: bitnami/rabbitmq:3.11
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-erlang-cookie}
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-username}
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-password}
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RABBITMQ_CLUSTER_NODE_NAME
+              value: "rabbit@rabbitmq-ha-0.rabbitmq-ha-headless.bookit.svc.cluster.local"
+            - name: RABBITMQ_NODE_NAME
+              value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
+          ports:
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15672
+              name: management
+            # Built-in Prometheus Metrics Plugin Port
+            - containerPort: 15692
+              name: metrics
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/rabbitmq/mnesia
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-ha-headless
+  namespace: bookit
+spec:
+  ports:
+    - port: 5672
+      name: amqp
+    - port: 4369
+      name: epmd
+    - port: 25672
+      name: cluster
+  clusterIP: None
+  selector:
+    app: rabbitmq-ha
+---
+# Standard Service acting as a Round-Robin Load Balancer to healthy RabbitMQ nodes
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-proxy
+  namespace: bookit
+spec:
+  ports:
+    - port: 5672
+      targetPort: 5672
+  selector:
+    app: rabbitmq-ha
+{{ end }}

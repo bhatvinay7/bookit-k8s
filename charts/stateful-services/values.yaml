@@ -1,0 +1,9 @@
+# Default values for stateful-services.
+
+global:
+  multiRegion:
+    enabled: false
+  useCloudProvider: false
+  primaryRegion: "us-east"
+  secondaryRegion: "eu-west"
+  currentRegion: "us-east"

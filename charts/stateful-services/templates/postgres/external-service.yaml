@@ -1,0 +1,10 @@
+{{ if .Values.global.useCloudProvider }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-proxy
+  namespace: bookit
+spec:
+  type: ExternalName
+  externalName: {{ if and .Values.global.multiRegion.enabled (eq .Values.global.currentRegion .Values.global.secondaryRegion) }}replica.postgres.cloud.bookit.com{{ else }}primary.postgres.cloud.bookit.com{{ end }}
+{{ end }}
