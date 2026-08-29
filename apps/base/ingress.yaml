@@ -17,7 +17,7 @@ spec:
         - ws.bookit4u.shop
         - web.bookit4u.shop
         - bookit4u.shop
-      secretName: boookit-shop-tls
+      secretName: bookit-shop-tls
   rules:
     - host: api.bookit4u.shop
       http:
