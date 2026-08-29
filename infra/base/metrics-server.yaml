@@ -131,12 +131,12 @@ spec:
       labels:
         k8s-app: metrics-server
     spec:
+      hostNetwork: true
       containers:
       - args:
         - --cert-dir=/tmp
         - --secure-port=10250
         - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-        - --kubelet-use-node-status-port
         - --metric-resolution=15s
         - --kubelet-insecure-tls
         image: registry.k8s.io/metrics-server/metrics-server:v0.9.0

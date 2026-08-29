@@ -21,12 +21,6 @@ spec:
         helm:
           releaseName: stateful-services
           values: |
-            global:
-              multiRegion:
-                enabled: '{{metadata.labels.multi_region_enabled}}'
-              primaryRegion: '{{metadata.labels.primary_region}}'
-              secondaryRegion: '{{metadata.labels.secondary_region}}'
-              currentRegion: '{{metadata.labels.region}}'
             postgres:
               useCloudProvider: true
             mongodb:

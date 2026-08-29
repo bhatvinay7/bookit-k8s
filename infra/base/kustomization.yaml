@@ -10,4 +10,3 @@ resources:
   - monitoring/otel-collector.yaml
   - monitoring/otel-collector-monitor.yaml
   - monitoring/tempo.yaml
-  - multi-region/external-dns.yaml
