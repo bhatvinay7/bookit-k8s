@@ -14,11 +14,12 @@ patches:
 # Metrics Server, OTEL Collector and Tempo.
 - target:
     kind: Deployment
+    name: metrics-server|tempo
   patch: |-
     - op: replace
       path: /spec/replicas
       value: 1
-    - op: add
+    - op: replace
       path: /spec/template/spec/containers/0/resources
       value:
         requests:

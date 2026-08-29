@@ -24,6 +24,7 @@ spec:
             - containerPort: 3200
             - containerPort: 4317
             - containerPort: 4318
+          resources: {}
           volumeMounts:
             - name: tempo-config
               mountPath: /etc/tempo.yaml
