@@ -59,14 +59,28 @@ redis_remote_url="${REDIS_REMOTE_URL:-$REDIS_URL}"
 out_dir="apps/regions/${environment}/${region}/secrets"
 [[ -d "$out_dir" ]] || { echo "unknown environment/region: ${environment}/${region}" >&2; exit 1; }
 
+controller_name="${SEALED_SECRETS_CONTROLLER_NAME:-sealed-secrets}"
+kubeseal_args=(
+  --context "$kube_context"
+  --controller-name "$controller_name"
+  --controller-namespace kube-system
+  --format yaml
+)
+if [[ -n "${SEALED_SECRETS_CERT_PATH:-}" ]]; then
+  [[ -r "$SEALED_SECRETS_CERT_PATH" ]] || {
+    echo "SEALED_SECRETS_CERT_PATH is not readable" >&2
+    exit 1
+  }
+  kubeseal_args+=(--cert "$SEALED_SECRETS_CERT_PATH")
+fi
+
 seal() {
   local secret_name="$1"
   local output="$2"
   shift 2
   kubectl --context "$kube_context" -n bookit create secret generic "$secret_name" \
     "$@" --dry-run=client -o yaml |
-    kubeseal --context "$kube_context" --controller-name sealed-secrets-controller \
-      --controller-namespace kube-system --format yaml > "${out_dir}/${output}"
+    kubeseal "${kubeseal_args[@]}" > "${out_dir}/${output}"
 }
 
 seal backend-secrets sealed-backend-secrets.yaml \
@@ -136,8 +150,7 @@ seal bookit-secrets sealed-platform-secrets.yaml \
 kubectl --context "$kube_context" -n bookit create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io --docker-username="$GHCR_USERNAME" \
   --docker-password="$GHCR_TOKEN" --dry-run=client -o yaml |
-  kubeseal --context "$kube_context" --controller-name sealed-secrets-controller \
-    --controller-namespace kube-system --format yaml > "${out_dir}/sealed-ghcr-secret.yaml"
+  kubeseal "${kubeseal_args[@]}" > "${out_dir}/sealed-ghcr-secret.yaml"
 
 printf '%s\n' \
   'apiVersion: kustomize.config.k8s.io/v1beta1' \
