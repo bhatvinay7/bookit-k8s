@@ -66,14 +66,6 @@ kubeseal_args=(
   --controller-namespace kube-system
   --format yaml
 )
-if [[ -n "${SEALED_SECRETS_CERT_PATH:-}" ]]; then
-  [[ -r "$SEALED_SECRETS_CERT_PATH" ]] || {
-    echo "SEALED_SECRETS_CERT_PATH is not readable" >&2
-    exit 1
-  }
-  kubeseal_args+=(--cert "$SEALED_SECRETS_CERT_PATH")
-fi
-
 seal() {
   local secret_name="$1"
   local output="$2"
