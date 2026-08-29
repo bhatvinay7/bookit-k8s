@@ -20,7 +20,7 @@ spec:
             name: backend-secrets
         - configMapRef:
             name: bookit-config
-        image: ghcr.io/bhatvinay7/bookit-search-server:latest
+        image: bookit-search-server:latest
         name: search-server
         ports:
         - containerPort: 8084

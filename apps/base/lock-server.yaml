@@ -24,7 +24,7 @@ spec:
             name: backend-secrets
         - configMapRef:
             name: bookit-config
-        image: ghcr.io/bhatvinay7/bookit-lock-server:latest
+        image: bookit-lock-server:latest
         imagePullPolicy: Always
         name: lock-server
         resources:

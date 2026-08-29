@@ -20,7 +20,7 @@ spec:
             name: backend-secrets
         - configMapRef:
             name: bookit-config
-        image: ghcr.io/bhatvinay7/bookit-payment-processor:latest
+        image: bookit-payment-processor:latest
         name: payment-processor
         resources:
           limits:
