@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: rabbitmq
-          image: bitnami/rabbitmq:3.11
+          image: bitnami/rabbitmq:latest
           env:
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:

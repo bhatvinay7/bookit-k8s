@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: bitnami/postgresql-repmgr:15
+          image: bitnami/postgresql-repmgr:latest
           ports:
             - containerPort: 5432
           env:
@@ -53,7 +53,7 @@ spec:
               mountPath: /bitnami/postgresql
         # Metrics Exporter
         - name: metrics
-          image: bitnami/postgres-exporter:0.12.0
+          image: bitnami/postgres-exporter:latest
           env:
             - name: DATA_SOURCE_NAME
               valueFrom:
@@ -101,7 +101,7 @@ spec:
     spec:
       containers:
         - name: pgpool
-          image: bitnami/pgpool:4
+          image: bitnami/pgpool:latest
           env:
             - name: PGPOOL_BACKEND_NODES
               value: "0:postgres-ha-0.postgres-ha-headless.bookit.svc.cluster.local:5432,1:postgres-ha-1.postgres-ha-headless.bookit.svc.cluster.local:5432,2:postgres-ha-2.postgres-ha-headless.bookit.svc.cluster.local:5432"

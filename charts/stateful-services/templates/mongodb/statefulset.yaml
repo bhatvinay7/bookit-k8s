@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: bitnami/mongodb:6.0
+          image: bitnami/mongodb:latest
           command: ["/bin/bash", "-ec"]
           args:
             - |

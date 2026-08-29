@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: bitnami/redis:7.0
+          image: bitnami/redis:latest
           command: ["/bin/bash", "-ec"]
           args:
             - |
@@ -42,7 +42,7 @@ spec:
             - name: data
               mountPath: /bitnami/redis/data
         - name: sentinel
-          image: bitnami/redis-sentinel:7.0
+          image: bitnami/redis-sentinel:latest
           env:
             - name: REDIS_MASTER_PASSWORD
               valueFrom:
