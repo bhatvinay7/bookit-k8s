@@ -14,7 +14,26 @@ patches:
 # Metrics Server, OTEL Collector and Tempo.
 - target:
     kind: Deployment
-    name: metrics-server|tempo
+    name: metrics-server
+  patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+          ephemeral-storage: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+          ephemeral-storage: 512Mi
+
+- target:
+    kind: Deployment
+    name: tempo
   patch: |-
     - op: replace
       path: /spec/replicas
