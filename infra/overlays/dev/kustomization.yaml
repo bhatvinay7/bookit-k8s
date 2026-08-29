@@ -48,29 +48,7 @@ patches:
           memory: 1Gi
           ephemeral-storage: 1Gi
 
-# One RabbitMQ replica is sufficient for functional testing. It is deliberately
-# not highly available and must never be promoted as production configuration.
-- target:
-    kind: StatefulSet
-    name: rabbitmq-ha
-  patch: |-
-    - op: replace
-      path: /spec/replicas
-      value: 1
-    - op: add
-      path: /spec/template/spec/containers/0/resources
-      value:
-        requests:
-          cpu: 100m
-          memory: 256Mi
-          ephemeral-storage: 128Mi
-        limits:
-          cpu: 500m
-          memory: 768Mi
-          ephemeral-storage: 1Gi
-    - op: replace
-      path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
-      value: 2Gi
+
 
 - target:
     kind: DaemonSet
