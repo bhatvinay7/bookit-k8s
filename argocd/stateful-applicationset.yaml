@@ -11,7 +11,7 @@ spec:
             deploy-stateful-services: "true"
   template:
     metadata:
-      name: '{{metadata.labels.region}}-stateful'
+      name: '{{name}}-stateful'
     spec:
       project: default
       source:
