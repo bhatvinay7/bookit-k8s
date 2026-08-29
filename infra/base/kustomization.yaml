@@ -3,7 +3,7 @@ kind: Kustomization
 resources:
   - metrics-server.yaml
 
-
+  - monitoring/namespace.yaml
   - monitoring/prometheus-grafana.yaml
   - monitoring/loki-stack.yaml
   - monitoring/fluent-bit.yaml
