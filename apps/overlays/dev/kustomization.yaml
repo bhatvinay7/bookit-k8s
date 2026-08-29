@@ -8,23 +8,26 @@ resources:
 namespace: bookit
 
 configMapGenerator:
-- name: bookit-config
-  behavior: merge
+- behavior: merge
   literals:
   - NODE_ENV=development
+  name: bookit-config
 
 labels:
 - pairs:
     app.kubernetes.io/part-of: bookit
     bookit.io/environment: dev
-  includeSelectors: false
 
+
+
+# Test-server resource profile. This patch applies uniformly to every Bookit
+# Deployment in the development overlay; production retains the base sizing.
+
+# A test cluster may burst to two pods per workload without allowing a noisy
+# service to consume the complete node.
 patches:
 - path: delete-worker-hpas.yaml
-- target:
-    kind: Ingress
-    name: bookit-ingress
-  patch: |-
+- patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0
       value: api.dev.bookit4u.shop
@@ -50,11 +53,10 @@ patches:
     - op: replace
       path: /spec/tls/0/secretName
       value: dev-boookit-shop-tls
-
-- target:
+  target:
     kind: Ingress
-    name: bookit-grpc-ingress
-  patch: |-
+    name: bookit-ingress
+- patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0
       value: grpc.dev.bookit4u.shop
@@ -64,12 +66,10 @@ patches:
     - op: replace
       path: /spec/tls/0/secretName
       value: grpc-dev-boookit-shop-tls
-
-# Test-server resource profile. This patch applies uniformly to every Bookit
-# Deployment in the development overlay; production retains the base sizing.
-- target:
-    kind: Deployment
-  patch: |-
+  target:
+    kind: Ingress
+    name: bookit-grpc-ingress
+- patch: |-
     - op: replace
       path: /spec/replicas
       value: 1
@@ -84,15 +84,39 @@ patches:
           cpu: 250m
           memory: 384Mi
           ephemeral-storage: 1Gi
-
-# A test cluster may burst to two pods per workload without allowing a noisy
-# service to consume the complete node.
-- target:
-    kind: HorizontalPodAutoscaler
-  patch: |-
+  target:
+    kind: Deployment
+- patch: |-
     - op: replace
       path: /spec/minReplicas
       value: 1
     - op: replace
       path: /spec/maxReplicas
       value: 1
+  target:
+    kind: HorizontalPodAutoscaler
+images:
+- name: bookit-gateway-keeper
+  newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
+  newTag: commit-ae4352b
+- name: bookit-http-server
+  newName: ghcr.io/bhatvinay7/bookit-http-server
+  newTag: commit-ae4352b
+- name: bookit-lock-server
+  newName: ghcr.io/bhatvinay7/bookit-lock-server
+  newTag: commit-ae4352b
+- name: bookit-notification-worker
+  newName: ghcr.io/bhatvinay7/bookit-notification-worker
+  newTag: commit-ae4352b
+- name: bookit-payment-processor
+  newName: ghcr.io/bhatvinay7/bookit-payment-processor
+  newTag: commit-ae4352b
+- name: bookit-search-server
+  newName: ghcr.io/bhatvinay7/bookit-search-server
+  newTag: commit-ae4352b
+- name: bookit-web
+  newName: ghcr.io/bhatvinay7/bookit-web
+  newTag: commit-ae4352b
+- name: bookit-ws-server
+  newName: ghcr.io/bhatvinay7/bookit-ws-server
+  newTag: commit-ae4352b
