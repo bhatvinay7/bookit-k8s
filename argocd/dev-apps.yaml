@@ -17,7 +17,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/bhatvinay7/bookit-k8s.git
-        targetRevision: dev
+        targetRevision: development
         path: '{{appsPath}}'
       destination:
         server: '{{url}}'
@@ -47,7 +47,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/bhatvinay7/bookit-k8s.git
-        targetRevision: dev
+        targetRevision: development
         path: infra/overlays/dev
       destination:
         server: '{{url}}'

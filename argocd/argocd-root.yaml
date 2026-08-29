@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/bhatvinay7/bookit-k8s.git
     # Bootstrap replaces this with dev or main before applying it.
-    targetRevision: dev
+    targetRevision: development
     path: argocd
   destination:
     server: https://kubernetes.default.svc
