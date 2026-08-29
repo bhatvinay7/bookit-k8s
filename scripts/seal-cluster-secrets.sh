@@ -139,6 +139,20 @@ seal bookit-secrets sealed-platform-secrets.yaml \
   --from-literal=AWS_ENDPOINT_URL="$CLOUDFLARE_R2_ENDPOINT" \
   --from-literal=AWS_DEFAULT_REGION="auto"
 
+seal custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
+  --from-literal=mongodb-root-password="${CUSTOM_DB_MONGODB_ROOT_PASSWORD:-}" \
+  --from-literal=mongodb-replica-set-key="${CUSTOM_DB_MONGODB_REPLICA_SET_KEY:-}" \
+  --from-literal=mongodb-exporter-uri="${CUSTOM_DB_MONGODB_EXPORTER_URI:-}" \
+  --from-literal=postgres-admin-password="${CUSTOM_DB_POSTGRES_ADMIN_PASSWORD:-}" \
+  --from-literal=postgres-password="${CUSTOM_DB_POSTGRES_PASSWORD:-}" \
+  --from-literal=repmgr-password="${CUSTOM_DB_REPMGR_PASSWORD:-}" \
+  --from-literal=postgres-exporter-dsn="${CUSTOM_DB_POSTGRES_EXPORTER_DSN:-}" \
+  --from-literal=pgpool-admin-password="${CUSTOM_DB_PGPOOL_ADMIN_PASSWORD:-}" \
+  --from-literal=rabbitmq-erlang-cookie="${CUSTOM_DB_RABBITMQ_ERLANG_COOKIE:-}" \
+  --from-literal=rabbitmq-username="${CUSTOM_DB_RABBITMQ_USERNAME:-}" \
+  --from-literal=rabbitmq-password="${CUSTOM_DB_RABBITMQ_PASSWORD:-}" \
+  --from-literal=redis-password="${CUSTOM_DB_REDIS_PASSWORD:-}"
+
 kubectl --context "$kube_context" -n bookit create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io --docker-username="$GHCR_USERNAME" \
   --docker-password="$GHCR_TOKEN" --dry-run=client -o yaml |
@@ -151,6 +165,7 @@ printf '%s\n' \
   '- sealed-backend-secrets.yaml' \
   '- sealed-frontend-secrets.yaml' \
   '- sealed-platform-secrets.yaml' \
+  '- sealed-custom-db-ha-secrets.yaml' \
   '- sealed-ghcr-secret.yaml' > "${out_dir}/kustomization.yaml"
 
 echo "sealed ${environment}/${region} secrets for context ${kube_context}"
