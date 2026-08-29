@@ -12,7 +12,7 @@ spec:
   tls:
     - hosts:
         - argocd.bookit4u.shop
-      secretName: argocd-boookit-shop-tls
+      secretName: argocd-bookit-shop-tls
   rules:
     - host: argocd.bookit4u.shop
       http:
