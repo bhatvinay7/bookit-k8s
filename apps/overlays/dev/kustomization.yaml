@@ -77,13 +77,13 @@ patches:
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
-          cpu: 50m
-          memory: 128Mi
-          ephemeral-storage: 128Mi
+          cpu: 10m
+          memory: 48Mi
+          ephemeral-storage: 64Mi
         limits:
-          cpu: 250m
-          memory: 384Mi
-          ephemeral-storage: 1Gi
+          cpu: 100m
+          memory: 192Mi
+          ephemeral-storage: 512Mi
   target:
     kind: Deployment
 - patch: |-

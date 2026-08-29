@@ -22,13 +22,13 @@ patches:
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
-          cpu: 50m
-          memory: 128Mi
-          ephemeral-storage: 128Mi
+          cpu: 10m
+          memory: 32Mi
+          ephemeral-storage: 64Mi
         limits:
-          cpu: 250m
-          memory: 384Mi
-          ephemeral-storage: 1Gi
+          cpu: 100m
+          memory: 128Mi
+          ephemeral-storage: 512Mi
 
 # The collector's configured memory limiter is 768 MiB, so its container limit
 # must remain above that threshold even on the test cluster.
@@ -40,13 +40,13 @@ patches:
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
+          cpu: 20m
+          memory: 64Mi
+          ephemeral-storage: 64Mi
+        limits:
           cpu: 100m
           memory: 256Mi
-          ephemeral-storage: 128Mi
-        limits:
-          cpu: 500m
-          memory: 1Gi
-          ephemeral-storage: 1Gi
+          ephemeral-storage: 512Mi
 
 
 
@@ -58,13 +58,13 @@ patches:
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
-          cpu: 25m
-          memory: 64Mi
-          ephemeral-storage: 128Mi
+          cpu: 10m
+          memory: 32Mi
+          ephemeral-storage: 64Mi
         limits:
-          cpu: 150m
-          memory: 192Mi
-          ephemeral-storage: 1Gi
+          cpu: 50m
+          memory: 128Mi
+          ephemeral-storage: 256Mi
 
 # Both backup pods have a dump container and an R2 upload sidecar. The 2 GiB
 # emptyDir is a test bound; larger test datasets require an explicit increase.
@@ -75,24 +75,24 @@ patches:
       path: /spec/jobTemplate/spec/template/spec/containers/0/resources
       value:
         requests:
-          cpu: 50m
-          memory: 128Mi
-          ephemeral-storage: 128Mi
+          cpu: 10m
+          memory: 32Mi
+          ephemeral-storage: 64Mi
         limits:
-          cpu: 250m
-          memory: 384Mi
-          ephemeral-storage: 2Gi
+          cpu: 100m
+          memory: 128Mi
+          ephemeral-storage: 512Mi
     - op: add
       path: /spec/jobTemplate/spec/template/spec/containers/1/resources
       value:
         requests:
-          cpu: 25m
-          memory: 64Mi
+          cpu: 10m
+          memory: 32Mi
           ephemeral-storage: 64Mi
         limits:
-          cpu: 150m
-          memory: 192Mi
-          ephemeral-storage: 512Mi
+          cpu: 50m
+          memory: 128Mi
+          ephemeral-storage: 256Mi
     - op: add
       path: /spec/jobTemplate/spec/template/spec/volumes/0/emptyDir/sizeLimit
       value: 2Gi
@@ -109,35 +109,35 @@ patches:
         - name: prometheus.prometheusSpec.retention
           value: 3d
         - name: prometheus.prometheusSpec.resources.requests.cpu
-          value: 100m
+          value: 20m
         - name: prometheus.prometheusSpec.resources.requests.memory
-          value: 256Mi
-        - name: prometheus.prometheusSpec.resources.limits.cpu
-          value: 500m
-        - name: prometheus.prometheusSpec.resources.limits.memory
-          value: 768Mi
-        - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage
-          value: 5Gi
-        - name: grafana.resources.requests.cpu
-          value: 50m
-        - name: grafana.resources.requests.memory
-          value: 128Mi
-        - name: grafana.resources.limits.cpu
-          value: 250m
-        - name: grafana.resources.limits.memory
-          value: 256Mi
-        - name: grafana.persistence.enabled
-          value: "true"
-        - name: grafana.persistence.size
-          value: 2Gi
-        - name: alertmanager.alertmanagerSpec.resources.requests.cpu
-          value: 25m
-        - name: alertmanager.alertmanagerSpec.resources.requests.memory
           value: 64Mi
-        - name: alertmanager.alertmanagerSpec.resources.limits.cpu
+        - name: prometheus.prometheusSpec.resources.limits.cpu
           value: 100m
-        - name: alertmanager.alertmanagerSpec.resources.limits.memory
+        - name: prometheus.prometheusSpec.resources.limits.memory
+          value: 256Mi
+        - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage
+          value: 2Gi
+        - name: grafana.resources.requests.cpu
+          value: 10m
+        - name: grafana.resources.requests.memory
+          value: 32Mi
+        - name: grafana.resources.limits.cpu
+          value: 100m
+        - name: grafana.resources.limits.memory
           value: 128Mi
+        - name: grafana.persistence.enabled
+          value: "false"
+        - name: grafana.persistence.size
+          value: 1Gi
+        - name: alertmanager.alertmanagerSpec.resources.requests.cpu
+          value: 10m
+        - name: alertmanager.alertmanagerSpec.resources.requests.memory
+          value: 32Mi
+        - name: alertmanager.alertmanagerSpec.resources.limits.cpu
+          value: 50m
+        - name: alertmanager.alertmanagerSpec.resources.limits.memory
+          value: 64Mi
 
 - target:
     kind: Application
@@ -147,12 +147,12 @@ patches:
       path: /spec/source/helm/parameters
       value:
         - name: loki.persistence.size
-          value: 5Gi
+          value: 2Gi
         - name: loki.resources.requests.cpu
-          value: 50m
+          value: 20m
         - name: loki.resources.requests.memory
-          value: 128Mi
+          value: 64Mi
         - name: loki.resources.limits.cpu
-          value: 250m
+          value: 100m
         - name: loki.resources.limits.memory
-          value: 384Mi
+          value: 192Mi
