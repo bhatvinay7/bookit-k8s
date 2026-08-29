@@ -39,6 +39,19 @@ spec:
               uid: tempo
               url: http://tempo.monitoring.svc.cluster.local:3200
               access: proxy
+        additionalServiceMonitors:
+          - name: otel-collector
+            namespace: monitoring
+            selector:
+              matchLabels:
+                app: otel-collector
+            namespaceSelector:
+              matchNames:
+                - monitoring
+            endpoints:
+              - port: metrics
+                path: /metrics
+                interval: 15s
         prometheus:
           prometheusSpec:
             retention: 15d
