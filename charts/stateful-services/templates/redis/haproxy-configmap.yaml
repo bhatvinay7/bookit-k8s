@@ -1,0 +1,35 @@
+{{ if not .Values.redis.useCloudProvider }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-haproxy-config
+  namespace: bookit
+data:
+  haproxy.cfg: |
+    global
+        maxconn 4096
+    
+    defaults
+        mode tcp
+        timeout connect 5s
+        timeout client 50s
+        timeout server 50s
+    
+    frontend redis_front
+        bind *:6379
+        default_backend redis_back
+    
+    backend redis_back
+        mode tcp
+        balance first
+        option tcp-check
+        tcp-check send PING\r\n
+        tcp-check expect string +PONG
+        tcp-check send info\ replication\r\n
+        tcp-check expect string role:master
+        tcp-check send QUIT\r\n
+        tcp-check expect string +OK
+        server redis-0 redis-ha-0.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s
+        server redis-1 redis-ha-1.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s
+        server redis-2 redis-ha-2.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s
+{{ end }}

@@ -106,9 +106,15 @@ spec:
       containers:
         - name: haproxy
           image: haproxy:2.4
-          # In production, mount an HAProxy config map that uses tcp-check to find the master
           ports:
             - containerPort: 6379
+          volumeMounts:
+            - name: haproxy-config
+              mountPath: /usr/local/etc/haproxy
+      volumes:
+        - name: haproxy-config
+          configMap:
+            name: redis-haproxy-config
 ---
 apiVersion: v1
 kind: Service
