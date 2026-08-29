@@ -19,6 +19,7 @@ spec:
         targetRevision: HEAD
         path: charts/stateful-services
         helm:
+          releaseName: stateful-services
           values: |
             global:
               multiRegion:
