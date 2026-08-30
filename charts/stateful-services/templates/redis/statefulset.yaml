@@ -25,6 +25,8 @@ spec:
             - |
               if [[ "$(hostname)" == *-0 ]]; then
                 export REDIS_REPLICATION_MODE=master
+                unset REDIS_MASTER_HOST
+                unset REDIS_MASTER_PASSWORD
               else
                 export REDIS_REPLICATION_MODE=slave
               fi

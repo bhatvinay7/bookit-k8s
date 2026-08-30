@@ -29,7 +29,8 @@ data:
         balance first
         # Use basic TCP connection check (sufficient for 1-replica development setup)
         # and avoids exposing or managing passwords inside the HAProxy config.
-        server redis-0 redis-ha-0.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s resolvers k8s resolve-prefer ipv4
-        server redis-1 redis-ha-1.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s resolvers k8s resolve-prefer ipv4
-        server redis-2 redis-ha-2.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s resolvers k8s resolve-prefer ipv4
+{{- $replicas := .Values.redis.replicas | default 3 | int }}
+{{- range $i := until $replicas }}
+        server redis-{{ $i }} redis-ha-{{ $i }}.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s resolvers k8s resolve-prefer ipv4
+{{- end }}
 {{ end }}

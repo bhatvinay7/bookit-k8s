@@ -30,6 +30,12 @@ spec:
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-password}
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-username}
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-password}
             - name: MY_POD_NAME
               valueFrom:
                 fieldRef:
@@ -40,6 +46,17 @@ spec:
               value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    rabbitmqctl await_startup;
+                    rabbitmqctl add_user "$RABBITMQ_USERNAME" "$RABBITMQ_PASSWORD" 2>/dev/null || true;
+                    rabbitmqctl set_user_tags "$RABBITMQ_USERNAME" administrator || true;
+                    rabbitmqctl set_permissions -p / "$RABBITMQ_USERNAME" ".*" ".*" ".*" || true;
           ports:
             - containerPort: 5672
               name: amqp
