@@ -1,0 +1,7 @@
+redis:
+  replicas: 3
+  proxyReplicas: 2
+  storage: 5Gi
+rabbitmq:
+  replicas: 3
+  storage: 5Gi

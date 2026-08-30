@@ -20,6 +20,8 @@ spec:
         path: charts/stateful-services
         helm:
           releaseName: stateful-services
+          valueFiles:
+            - 'values-{{metadata.labels.environment}}.yaml'
           values: |
             postgres:
               useCloudProvider: true

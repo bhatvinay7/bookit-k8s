@@ -6,7 +6,7 @@ metadata:
   namespace: bookit
 spec:
   serviceName: "redis-ha-headless"
-  replicas: 3
+  replicas: {{ .Values.redis.replicas | default 3 }}
   selector:
     matchLabels:
       app: redis-ha
@@ -70,7 +70,10 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 5Gi
+            storage: {{ .Values.redis.storage | default "5Gi" }}
+          {{- if .Values.redis.resources }}
+{{ toYaml .Values.redis.resources | indent 10 }}
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -94,7 +97,7 @@ metadata:
   name: redis-proxy
   namespace: bookit
 spec:
-  replicas: 2
+  replicas: {{ .Values.redis.proxyReplicas | default 2 }}
   selector:
     matchLabels:
       app: redis-proxy

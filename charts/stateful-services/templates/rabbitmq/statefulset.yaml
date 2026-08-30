@@ -6,7 +6,7 @@ metadata:
   namespace: bookit
 spec:
   serviceName: "rabbitmq-ha-headless"
-  replicas: 3
+  replicas: {{ .Values.rabbitmq.replicas | default 3 }}
   selector:
     matchLabels:
       app: rabbitmq-ha
@@ -54,7 +54,10 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 5Gi
+            storage: {{ .Values.rabbitmq.storage | default "5Gi" }}
+          {{- if .Values.rabbitmq.resources }}
+{{ toYaml .Values.rabbitmq.resources | indent 10 }}
+          {{- end }}
 ---
 apiVersion: v1
 kind: Service

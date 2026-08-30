@@ -1,0 +1,21 @@
+redis:
+  replicas: 1
+  proxyReplicas: 1
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+rabbitmq:
+  replicas: 1
+  storage: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
