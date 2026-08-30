@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: rabbitmq-ha-v4
+  name: rabbitmq-ha-v5
   namespace: bookit
 spec:
   serviceName: "rabbitmq-ha-headless"
@@ -19,7 +19,7 @@ spec:
         fsGroup: 1001
       initContainers:
         - name: init-definitions
-          image: busybox:1.36
+          image: bitnamilegacy/rabbitmq:4.1.3-debian-12-r1
           env:
             - name: RABBITMQ_USERNAME
               valueFrom:
@@ -30,16 +30,20 @@ spec:
           volumeMounts:
             - name: rabbitmq-conf
               mountPath: /app
-          command: ["/bin/sh", "-c"]
+          command: ["/bin/bash", "-c"]
           args:
             - |
+              # Generate the hash securely offline (must use --quiet to avoid erlang warnings)
+              HASH=$(rabbitmqctl hash_password --quiet "$RABBITMQ_PASSWORD" | tr -d '\r' | tr -d '\n')
+              
               cat <<EOF > /app/load_definition.json
               {
                 "rabbit_version": "4.1.3",
                 "users": [
                   {
                     "name": "$RABBITMQ_USERNAME",
-                    "password": "$RABBITMQ_PASSWORD",
+                    "password_hash": "$HASH",
+                    "hashing_algorithm": "rabbit_password_hashing_sha256",
                     "tags": "administrator"
                   }
                 ],
