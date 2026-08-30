@@ -1,5 +1,5 @@
 redis:
-  replicas: 2
+  replicas: 1
   proxyReplicas: 1
   storage: 2Gi
   resources:
