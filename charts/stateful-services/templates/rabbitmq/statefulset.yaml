@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: rabbitmq-ha
+  name: rabbitmq-ha-v2
   namespace: bookit
 spec:
   serviceName: "rabbitmq-ha-headless"
