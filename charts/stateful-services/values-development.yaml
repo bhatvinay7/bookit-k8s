@@ -1,7 +1,7 @@
 redis:
   replicas: 1
   proxyReplicas: 1
-  storage: 2Gi
+  storage: 5Gi
   resources:
     requests:
       cpu: 50m
@@ -11,7 +11,7 @@ redis:
       memory: 256Mi
 rabbitmq:
   replicas: 1
-  storage: 2Gi
+  storage: 5Gi
   resources:
     requests:
       cpu: 50m
