@@ -98,25 +98,25 @@ patches:
 images:
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-c974641
+  newTag: commit-07ae003
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
   newTag: commit-07ae003
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-c974641
+  newTag: commit-07ae003
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-c974641
+  newTag: commit-07ae003
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
-  newTag: commit-c974641
+  newTag: commit-07ae003
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
-  newTag: commit-c974641
+  newTag: commit-07ae003
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-bfd4e97
+  newTag: commit-07ae003
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-bfd4e97
+  newTag: commit-07ae003
