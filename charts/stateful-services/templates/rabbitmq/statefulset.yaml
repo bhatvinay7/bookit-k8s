@@ -35,7 +35,10 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: RABBITMQ_CLUSTER_NODE_NAME
-              value: "rabbit@rabbitmq-ha-0.rabbitmq-ha-headless.bookit.svc.cluster.local"
+              # The seed hostname must match this StatefulSet's pod-name prefix.
+              # A nonexistent rabbitmq-ha-0 seed keeps every pod unready, leaving
+              # rabbitmq-proxy without endpoints and clients see ECONNREFUSED.
+              value: "rabbit@rabbitmq-ha-v6-0.rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_NODE_NAME
               value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_USE_LONGNAME
