@@ -44,6 +44,10 @@ spec:
             # Built-in Prometheus Metrics Plugin Port
             - containerPort: 15692
               name: metrics
+          {{- if .Values.rabbitmq.resources }}
+          resources:
+{{ toYaml .Values.rabbitmq.resources | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /bitnami/rabbitmq/mnesia
@@ -63,9 +67,6 @@ spec:
         resources:
           requests:
             storage: {{ .Values.rabbitmq.storage | default "5Gi" }}
-          {{- if .Values.rabbitmq.resources }}
-{{ toYaml .Values.rabbitmq.resources | indent 10 }}
-          {{- end }}
 ---
 apiVersion: v1
 kind: Service

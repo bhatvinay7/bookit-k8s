@@ -38,6 +38,10 @@ spec:
                 secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
           ports:
             - containerPort: 6379
+          {{- if .Values.redis.resources }}
+          resources:
+{{ toYaml .Values.redis.resources | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /bitnami/redis/data
@@ -71,9 +75,6 @@ spec:
         resources:
           requests:
             storage: {{ .Values.redis.storage | default "5Gi" }}
-          {{- if .Values.redis.resources }}
-{{ toYaml .Values.redis.resources | indent 10 }}
-          {{- end }}
 ---
 apiVersion: v1
 kind: Service
