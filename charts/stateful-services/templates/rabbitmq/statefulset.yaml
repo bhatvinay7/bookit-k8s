@@ -49,9 +49,23 @@ spec:
               value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
+            - name: RABBITMQ_PLUGINS
+              value: "rabbitmq_management rabbitmq_prometheus rabbitmq_auth_mechanism_ssl"
+            - name: RABBITMQ_NODE_SSL_PORT_NUMBER
+              value: "5671"
+            - name: RABBITMQ_SSL_CACERTFILE
+              value: /opt/bitnami/rabbitmq/certs/ca.crt
+            - name: RABBITMQ_SSL_CERTFILE
+              value: /opt/bitnami/rabbitmq/certs/tls.crt
+            - name: RABBITMQ_SSL_KEYFILE
+              value: /opt/bitnami/rabbitmq/certs/tls.key
+            - name: RABBITMQ_SSL_VERIFY
+              value: verify_peer
+            - name: RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT
+              value: "yes"
           ports:
-            - containerPort: 5672
-              name: amqp
+            - containerPort: 5671
+              name: amqps
             - containerPort: 15672
               name: management
             # Built-in Prometheus Metrics Plugin Port
@@ -64,14 +78,28 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /bitnami/rabbitmq/mnesia
+            - name: rabbitmq-server-tls
+              mountPath: /opt/bitnami/rabbitmq/certs
+              readOnly: true
+            - name: rabbitmq-config
+              mountPath: /bitnami/rabbitmq/conf/custom.conf
+              subPath: custom.conf
+              readOnly: true
           readinessProbe:
             tcpSocket:
-              port: 5672
+              port: 5671
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
             successThreshold: 1
+      volumes:
+        - name: rabbitmq-server-tls
+          secret:
+            secretName: rabbitmq-server-tls
+        - name: rabbitmq-config
+          configMap:
+            name: rabbitmq-config
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -88,8 +116,8 @@ metadata:
   namespace: bookit
 spec:
   ports:
-    - port: 5672
-      name: amqp
+    - port: 5671
+      name: amqps
     - port: 4369
       name: epmd
     - port: 25672
@@ -106,8 +134,9 @@ metadata:
   namespace: bookit
 spec:
   ports:
-    - port: 5672
-      targetPort: 5672
+    - name: amqps
+      port: 5671
+      targetPort: amqps
   selector:
     app: rabbitmq-ha
 {{ end }}

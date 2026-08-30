@@ -1,0 +1,94 @@
+{{ if not .Values.rabbitmq.useCloudProvider }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rabbitmq-selfsigned
+  namespace: bookit
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq-ca
+  namespace: bookit
+spec:
+  isCA: true
+  commonName: Bookit RabbitMQ CA
+  secretName: rabbitmq-ca
+  duration: 87600h
+  renewBefore: 720h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: rabbitmq-selfsigned
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: rabbitmq-ca
+  namespace: bookit
+spec:
+  ca:
+    secretName: rabbitmq-ca
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq-server
+  namespace: bookit
+spec:
+  secretName: rabbitmq-server-tls
+  duration: 2160h
+  renewBefore: 360h
+  dnsNames:
+    - rabbitmq-proxy
+    - rabbitmq-proxy.bookit
+    - rabbitmq-proxy.bookit.svc
+    - rabbitmq-proxy.bookit.svc.cluster.local
+    - rabbitmq-ha-headless
+    - rabbitmq-ha-headless.bookit.svc.cluster.local
+    - "*.rabbitmq-ha-headless.bookit.svc.cluster.local"
+  usages:
+    - server auth
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    name: rabbitmq-ca
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rabbitmq-client
+  namespace: bookit
+spec:
+  secretName: rabbitmq-client-tls
+  commonName: bookit
+  duration: 720h
+  renewBefore: 168h
+  usages:
+    - client auth
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    rotationPolicy: Always
+  issuerRef:
+    name: rabbitmq-ca
+    kind: Issuer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+  namespace: bookit
+data:
+  custom.conf: |
+    listeners.tcp = none
+    auth_mechanisms.1 = EXTERNAL
+    ssl_cert_login_from = common_name
+{{ end }}

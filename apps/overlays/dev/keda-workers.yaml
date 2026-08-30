@@ -7,9 +7,15 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   secretTargetRef:
-  - parameter: host
-    name: backend-secrets
-    key: RABBITMQ_URL
+  - parameter: ca
+    name: rabbitmq-client-tls
+    key: ca.crt
+  - parameter: cert
+    name: rabbitmq-client-tls
+    key: tls.crt
+  - parameter: key
+    name: rabbitmq-client-tls
+    key: tls.key
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -31,6 +37,8 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
+      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      tls: enable
       protocol: amqp
       queueName: locking_queue
       mode: QueueLength
@@ -59,6 +67,8 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
+      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      tls: enable
       protocol: amqp
       queueName: payment_processing
       mode: QueueLength
@@ -87,6 +97,8 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
+      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      tls: enable
       protocol: amqp
       queueName: notification_queue
       mode: QueueLength
