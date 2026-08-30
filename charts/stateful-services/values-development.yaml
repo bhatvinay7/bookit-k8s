@@ -18,4 +18,4 @@ rabbitmq:
       memory: 128Mi
     limits:
       cpu: 250m
-      memory: 512Mi
+      memory: 768Mi

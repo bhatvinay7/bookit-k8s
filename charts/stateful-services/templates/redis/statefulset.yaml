@@ -109,6 +109,10 @@ spec:
       containers:
         - name: haproxy
           image: haproxy:2.4
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
           ports:
             - containerPort: 6379
           volumeMounts:
