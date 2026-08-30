@@ -36,6 +36,8 @@ spec:
               value: "rabbit@rabbitmq-ha-0.rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_NODE_NAME
               value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
           ports:
             - containerPort: 5672
               name: amqp
