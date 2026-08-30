@@ -110,11 +110,6 @@ spec:
       containers:
         - name: haproxy
           image: haproxy:2.4
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              sed "s/\${REDIS_PASSWORD}/$REDIS_PASSWORD/g" /usr/local/etc/haproxy-template/haproxy.cfg > /usr/local/etc/haproxy/haproxy.cfg
-              exec haproxy -f /usr/local/etc/haproxy/haproxy.cfg
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -122,14 +117,10 @@ spec:
           ports:
             - containerPort: 6379
           volumeMounts:
-            - name: haproxy-config-dir
+            - name: haproxy-config
               mountPath: /usr/local/etc/haproxy
-            - name: haproxy-template
-              mountPath: /usr/local/etc/haproxy-template
       volumes:
-        - name: haproxy-config-dir
-          emptyDir: {}
-        - name: haproxy-template
+        - name: haproxy-config
           configMap:
             name: redis-haproxy-config
 ---
