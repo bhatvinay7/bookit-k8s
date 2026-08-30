@@ -22,10 +22,10 @@ spec:
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-erlang-cookie}
-            - name: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-username}
-            - name: RABBITMQ_DEFAULT_PASS
+            - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-password}
             - name: MY_POD_NAME
@@ -47,6 +47,14 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /bitnami/rabbitmq/mnesia
+          readinessProbe:
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
   volumeClaimTemplates:
     - metadata:
         name: data
