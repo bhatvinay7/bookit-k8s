@@ -4,6 +4,8 @@ kind: StatefulSet
 metadata:
   name: rabbitmq-ha-v6
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   serviceName: "rabbitmq-ha-headless"
   replicas: {{ .Values.rabbitmq.replicas | default 3 }}

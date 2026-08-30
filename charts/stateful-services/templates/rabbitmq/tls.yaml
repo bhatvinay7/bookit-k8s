@@ -4,6 +4,8 @@ kind: Issuer
 metadata:
   name: rabbitmq-selfsigned
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-4"
 spec:
   selfSigned: {}
 ---
@@ -12,6 +14,8 @@ kind: Certificate
 metadata:
   name: rabbitmq-ca
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
 spec:
   isCA: true
   commonName: Bookit RabbitMQ CA
@@ -30,6 +34,8 @@ kind: Issuer
 metadata:
   name: rabbitmq-ca
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   ca:
     secretName: rabbitmq-ca
@@ -39,6 +45,8 @@ kind: Certificate
 metadata:
   name: rabbitmq-server
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   secretName: rabbitmq-server-tls
   duration: 2160h
@@ -66,6 +74,8 @@ kind: Certificate
 metadata:
   name: rabbitmq-client
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   secretName: rabbitmq-client-tls
   commonName: bookit
@@ -86,6 +96,8 @@ kind: ConfigMap
 metadata:
   name: rabbitmq-config
   namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 data:
   custom.conf: |
     listeners.tcp = none
