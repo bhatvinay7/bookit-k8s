@@ -24,13 +24,13 @@ data:
         mode tcp
         balance first
         option tcp-check
-        tcp-check send AUTH\ ${REDIS_PASSWORD}\r\n
+        tcp-check send "AUTH ${REDIS_PASSWORD}\r\n"
         tcp-check expect string +OK
-        tcp-check send PING\r\n
+        tcp-check send "PING\r\n"
         tcp-check expect string +PONG
-        tcp-check send info\ replication\r\n
+        tcp-check send "info replication\r\n"
         tcp-check expect string role:master
-        tcp-check send QUIT\r\n
+        tcp-check send "QUIT\r\n"
         tcp-check expect string +OK
         server redis-0 redis-ha-0.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s
         server redis-1 redis-ha-1.redis-ha-headless.bookit.svc.cluster.local:6379 check inter 2s
