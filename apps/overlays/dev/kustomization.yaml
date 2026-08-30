@@ -88,11 +88,11 @@ patches:
     kind: Deployment
 - patch: |-
     - op: replace
-      path: /spec/minReplicas
-      value: 1
-    - op: replace
       path: /spec/maxReplicas
-      value: 1
+      value: 3
+    - op: replace
+      path: /spec/metrics/0/resource/target/averageUtilization
+      value: 85
   target:
     kind: HorizontalPodAutoscaler
 images:
