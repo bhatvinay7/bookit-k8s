@@ -24,10 +24,10 @@ spec:
             - name: RABBITMQ_ERLANG_COOKIE
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-erlang-cookie}
-            - name: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_USERNAME
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-username}
-            - name: RABBITMQ_DEFAULT_PASS
+            - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef: {name: custom-db-ha-secrets, key: rabbitmq-password}
             - name: MY_POD_NAME
@@ -43,6 +43,20 @@ spec:
               value: "rabbit@$(MY_POD_NAME).rabbitmq-ha-headless.bookit.svc.cluster.local"
             - name: RABBITMQ_USE_LONGNAME
               value: "true"
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -ec
+                  - |
+                    rabbitmqctl await_startup
+                    if rabbitmqctl list_users --silent | awk '{print $1}' | grep -Fxq "$RABBITMQ_USERNAME"; then
+                      rabbitmqctl change_password "$RABBITMQ_USERNAME" "$RABBITMQ_PASSWORD"
+                    else
+                      rabbitmqctl add_user "$RABBITMQ_USERNAME" "$RABBITMQ_PASSWORD"
+                    fi
+                    rabbitmqctl set_permissions -p / "$RABBITMQ_USERNAME" '.*' '.*' '.*'
           ports:
             - containerPort: 5672
               name: amqp
