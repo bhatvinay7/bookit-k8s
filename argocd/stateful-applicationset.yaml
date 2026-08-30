@@ -12,6 +12,8 @@ spec:
   template:
     metadata:
       name: '{{name}}-stateful'
+      annotations:
+        argocd.argoproj.io/sync-wave: "5"
     spec:
       project: default
       source:
