@@ -2,5 +2,5 @@ apiVersion: v2
 name: stateful-services
 description: A Helm chart for deploying conditional stateful databases (Postgres, Redis, RabbitMQ, MongoDB) across multiple regions.
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "1.0"
