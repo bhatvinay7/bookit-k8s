@@ -107,7 +107,7 @@ images:
   newTag: commit-d6f98b7
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-d6f98b7
+  newTag: commit-b987728
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
   newTag: commit-d6f98b7
