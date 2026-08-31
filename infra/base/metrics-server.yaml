@@ -125,8 +125,7 @@ spec:
     matchLabels:
       k8s-app: metrics-server
   strategy:
-    rollingUpdate:
-      maxUnavailable: 0
+    type: Recreate
   template:
     metadata:
       labels:
