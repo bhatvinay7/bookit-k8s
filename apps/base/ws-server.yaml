@@ -15,7 +15,13 @@ spec:
         app: ws-server
     spec:
       containers:
-      - envFrom:
+      - env:
+        - name: GATEWAY_KEEPER_GRPC_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: GATEWAY_KEEPER_GRPC_URL
+        envFrom:
         - secretRef:
             name: backend-secrets
         - configMapRef:
