@@ -148,9 +148,6 @@ seal custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
   --from-literal=repmgr-password="${CUSTOM_DB_REPMGR_PASSWORD:-}" \
   --from-literal=postgres-exporter-dsn="${CUSTOM_DB_POSTGRES_EXPORTER_DSN:-}" \
   --from-literal=pgpool-admin-password="${CUSTOM_DB_PGPOOL_ADMIN_PASSWORD:-}" \
-  --from-literal=rabbitmq-erlang-cookie="${CUSTOM_DB_RABBITMQ_ERLANG_COOKIE:-}" \
-  --from-literal=rabbitmq-username="${CUSTOM_DB_RABBITMQ_USERNAME:-}" \
-  --from-literal=rabbitmq-password="${CUSTOM_DB_RABBITMQ_PASSWORD:-}" \
   --from-literal=redis-password="${CUSTOM_DB_REDIS_PASSWORD:-}"
 
 kubectl --context "$kube_context" -n bookit create secret docker-registry ghcr-secret \

@@ -14,8 +14,8 @@ rabbitmq:
   storage: 5Gi
   resources:
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 500m
+      memory: 1Gi
     limits:
       cpu: 1000m
-      memory: 500Mi
+      memory: 1Gi

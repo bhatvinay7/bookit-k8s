@@ -348,7 +348,8 @@ policy if available.
 `charts/stateful-services` is a dynamic Helm chart that handles database deployments across single or multi-region setups. It is deployed automatically via the `argocd/stateful-applicationset.yaml` ArgoCD ApplicationSet.
 
 This architecture offers granular cloud provider controls:
-- **Redis & RabbitMQ:** Always deploy locally as custom highly-available StatefulSets.
+- **Redis:** Deploys locally as a custom highly-available StatefulSet when a managed service is disabled.
+- **RabbitMQ:** Deploys through the official RabbitMQ Cluster Operator (`v2.22.3`). The Messaging Topology Operator (`v1.20.2`) declaratively creates the passwordless `bookit` user and permissions. Client connections use mTLS with SASL `EXTERNAL`; password-based AMQP listeners are disabled.
 - **PostgreSQL & MongoDB:** Evaluated dynamically based on your environment's cloud preference. If `USE_CLOUD_PROVIDER` is true, the chart provisions an `ExternalName` Service proxying traffic to your SaaS databases. If false, it falls back to custom in-cluster StatefulSet deployments.
 
 **Integrated S3 Backups:**
@@ -359,7 +360,6 @@ Before using custom deployments, ensure you seal a `custom-db-ha-secrets` Secret
 - `mongodb-root-password`, `mongodb-replica-set-key`, `mongodb-exporter-uri`;
 - `postgres-admin-password`, `postgres-password`, `repmgr-password`,
   `postgres-exporter-dsn`, `pgpool-admin-password`;
-- `rabbitmq-erlang-cookie`, `rabbitmq-username`, `rabbitmq-password`;
 - `redis-password`.
 
 **Multi-Region Behavior:**

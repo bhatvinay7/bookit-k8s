@@ -1,45 +1,4 @@
-{{ if not .Values.rabbitmq.useCloudProvider }}
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: rabbitmq-selfsigned
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-wave: "-4"
-spec:
-  selfSigned: {}
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: rabbitmq-ca
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-wave: "-3"
-spec:
-  isCA: true
-  commonName: Bookit RabbitMQ CA
-  secretName: rabbitmq-ca
-  duration: 87600h
-  renewBefore: 720h
-  privateKey:
-    algorithm: ECDSA
-    size: 256
-  issuerRef:
-    name: rabbitmq-selfsigned
-    kind: Issuer
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: rabbitmq-ca
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
-spec:
-  ca:
-    secretName: rabbitmq-ca
----
+{{- if not .Values.rabbitmq.useCloudProvider }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -52,13 +11,14 @@ spec:
   duration: 2160h
   renewBefore: 360h
   dnsNames:
-    - rabbitmq-proxy
-    - rabbitmq-proxy.bookit
-    - rabbitmq-proxy.bookit.svc
-    - rabbitmq-proxy.bookit.svc.cluster.local
-    - rabbitmq-ha-headless
-    - rabbitmq-ha-headless.bookit.svc.cluster.local
-    - "*.rabbitmq-ha-headless.bookit.svc.cluster.local"
+    - rabbitmq
+    - rabbitmq.bookit
+    - rabbitmq.bookit.svc
+    - rabbitmq.bookit.svc.cluster.local
+    - rabbitmq-nodes
+    - rabbitmq-nodes.bookit.svc
+    - rabbitmq-nodes.bookit.svc.cluster.local
+    - "*.rabbitmq-nodes.bookit.svc.cluster.local"
   usages:
     - server auth
   privateKey:
@@ -67,7 +27,19 @@ spec:
     rotationPolicy: Always
   issuerRef:
     name: rabbitmq-ca
-    kind: Issuer
+    kind: ClusterIssuer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-client-keystore-password
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+type: Opaque
+data:
+  # PKCS#12 compatibility password; it is not a RabbitMQ login credential.
+  password: Ym9va2l0LXBrY3MxMg==
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -87,20 +59,14 @@ spec:
     algorithm: RSA
     size: 2048
     rotationPolicy: Always
+  keystores:
+    pkcs12:
+      create: true
+      profile: Modern2023
+      passwordSecretRef:
+        name: rabbitmq-client-keystore-password
+        key: password
   issuerRef:
     name: rabbitmq-ca
-    kind: Issuer
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: rabbitmq-config
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
-data:
-  custom.conf: |
-    listeners.tcp = none
-    auth_mechanisms.1 = EXTERNAL
-    ssl_cert_login_from = common_name
-{{ end }}
+    kind: ClusterIssuer
+{{- end }}

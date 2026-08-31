@@ -1,0 +1,99 @@
+{{- if not .Values.rabbitmq.useCloudProvider }}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: {{ .Values.rabbitmq.replicas | default 3 }}
+  persistence:
+    storage: {{ .Values.rabbitmq.storage | default "5Gi" | quote }}
+  {{- with .Values.rabbitmq.resources }}
+  resources:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: rabbitmq
+  tls:
+    secretName: rabbitmq-server-tls
+    caSecretName: rabbitmq-server-tls
+    disableNonTLSListeners: true
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_auth_mechanism_ssl
+    additionalConfig: |
+      auth_mechanisms.1 = EXTERNAL
+      ssl_cert_login_from = common_name
+      ssl_options.fail_if_no_peer_cert = true
+      cluster_partition_handling = pause_minority
+      disk_free_limit.relative = 1.0
+      collect_statistics_interval = 10000
+      default_queue_type = quorum
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rabbitmq
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-bookit-user
+  namespace: bookit
+  labels:
+    rabbitmq.com/topology-operator: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+type: Opaque
+stringData:
+  username: bookit
+  # An explicitly empty hash creates an x509-only, passwordless RabbitMQ user.
+  passwordHash: ""
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: bookit
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq
+  importCredentialsSecret:
+    name: rabbitmq-bookit-user
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Permission
+metadata:
+  name: bookit
+  namespace: bookit
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  vhost: "/"
+  user: bookit
+  permissions:
+    configure: ".*"
+    write: ".*"
+    read: ".*"
+  rabbitmqClusterReference:
+    name: rabbitmq
+{{- end }}

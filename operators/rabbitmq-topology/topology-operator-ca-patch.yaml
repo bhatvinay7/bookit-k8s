@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-topology-operator
+  namespace: rabbitmq-system
+spec:
+  template:
+    spec:
+      containers:
+        - name: manager
+          volumeMounts:
+            - name: rabbitmq-ca
+              mountPath: /etc/ssl/certs/bookit-rabbitmq-ca.crt
+              subPath: ca.crt
+              readOnly: true
+      volumes:
+        - name: rabbitmq-ca
+          secret:
+            secretName: rabbitmq-topology-ca
+            defaultMode: 0444

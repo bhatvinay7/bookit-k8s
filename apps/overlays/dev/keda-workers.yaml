@@ -37,7 +37,7 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
       tls: enable
       protocol: amqp
       queueName: locking_queue
@@ -67,7 +67,7 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
       tls: enable
       protocol: amqp
       queueName: payment_processing
@@ -97,7 +97,7 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq-proxy.bookit.svc.cluster.local:5671/%2f
+      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
       tls: enable
       protocol: amqp
       queueName: notification_queue

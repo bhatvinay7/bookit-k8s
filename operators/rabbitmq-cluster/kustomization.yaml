@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - https://github.com/rabbitmq/cluster-operator/config/default?ref=v2.22.3
+
+# The tagged source overlay still refers to :latest. Pin the exact image from
+# the official v2.22.3 release manifest for reproducible GitOps deployments.
+images:
+  - name: ghcr.io/rabbitmq/cluster-operator
+    newTag: 2.22.3
