@@ -20,6 +20,16 @@ spec:
   {{- end }}
   affinity:
     podAntiAffinity:
+      {{- if gt (int (default 3 .Values.rabbitmq.replicas)) 1 }}
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - rabbitmq
+          topologyKey: kubernetes.io/hostname
+      {{- else }}
       preferredDuringSchedulingIgnoredDuringExecution:
         - weight: 100
           podAffinityTerm:
@@ -27,6 +37,21 @@ spec:
             labelSelector:
               matchLabels:
                 app.kubernetes.io/name: rabbitmq
+      {{- end }}
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            {{- if gt (int (default 3 .Values.rabbitmq.replicas)) 1 }}
+            topologySpreadConstraints:
+              - maxSkew: 1
+                topologyKey: "topology.kubernetes.io/zone"
+                whenUnsatisfiable: ScheduleAnyway
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: rabbitmq
+            {{- end }}
   tls:
     secretName: rabbitmq-server-tls
     caSecretName: rabbitmq-server-tls
@@ -40,6 +65,11 @@ spec:
       ssl_options.verify = verify_peer
       ssl_options.fail_if_no_peer_cert = true
       default_queue_type = quorum
+      {{- if gt (int (default 3 .Values.rabbitmq.replicas)) 1 }}
+      cluster_partition_handling = pause_minority
+      disk_free_limit.relative = 1.0
+      collect_statistics_interval = 10000
+      {{- end }}
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
