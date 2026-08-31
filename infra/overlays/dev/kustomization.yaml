@@ -57,6 +57,9 @@ patches:
     name: otel-collector
   patch: |-
     - op: replace
+      path: /spec/replicas
+      value: 1
+    - op: replace
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
@@ -126,6 +129,16 @@ patches:
     - op: add
       path: /spec/source/helm/parameters
       value:
+        - name: prometheusOperator.replicas
+          value: "1"
+        - name: prometheus.prometheusSpec.replicas
+          value: "1"
+        - name: alertmanager.alertmanagerSpec.replicas
+          value: "1"
+        - name: grafana.replicas
+          value: "1"
+        - name: kube-state-metrics.replicas
+          value: "1"
         - name: prometheus.prometheusSpec.retention
           value: 3d
         - name: prometheus.prometheusSpec.resources.requests.cpu
@@ -168,6 +181,8 @@ patches:
     - op: add
       path: /spec/source/helm/parameters
       value:
+        - name: loki.replicas
+          value: "1"
         - name: loki.persistence.size
           value: 2Gi
         - name: loki.resources.requests.cpu

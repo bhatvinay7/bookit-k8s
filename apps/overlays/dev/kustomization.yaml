@@ -85,15 +85,6 @@ patches:
           ephemeral-storage: 512Mi
   target:
     kind: Deployment
-- patch: |-
-    - op: replace
-      path: /spec/maxReplicas
-      value: 1
-    - op: replace
-      path: /spec/metrics/0/resource/target/averageUtilization
-      value: 85
-  target:
-    kind: HorizontalPodAutoscaler
 images:
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
