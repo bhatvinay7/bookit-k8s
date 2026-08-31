@@ -47,12 +47,6 @@ helm upgrade --install cert-manager jetstack/cert-manager \
 
 pass "cert-manager installed."
 
-# 4. Install RabbitMQ Cluster Operator
-info "Installing RabbitMQ Cluster Operator..."
-kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
-info "Waiting for RabbitMQ Operator to be ready..."
-kubectl -n rabbitmq-system wait --for=condition=Available deployment/rabbitmq-cluster-operator --timeout=120s
-pass "RabbitMQ Operator installed."
 
 # 5. Install Prometheus Operator CRDs (Required for ServiceMonitors to render)
 info "Installing Prometheus Operator CRDs (so ServiceMonitor resources don't fail)..."
@@ -69,7 +63,7 @@ helm upgrade --install stateful-services ./charts/stateful-services \
   --set postgres.useCloudProvider=false \
   --set mongodb.useCloudProvider=false \
   --set redis.useCloudProvider=false \
-  --set rabbitmq.useCloudProvider=false \
+
   --wait \
   --timeout 5m
 
@@ -77,7 +71,7 @@ pass "stateful-services Helm chart deployed successfully!"
 
 info "You can now check the running pods with:"
 echo "kubectl get pods -n bookit"
-echo "kubectl get rabbitmqclusters -n bookit"
+
 echo ""
 info "To clean up and destroy the local cluster, run:"
 echo "kind delete cluster --name $CLUSTER_NAME"

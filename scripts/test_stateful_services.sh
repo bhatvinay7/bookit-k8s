@@ -36,7 +36,6 @@ echo "==============================="
 # 1. Helm lint
 info "Running helm lint on stateful-services chart..."
 LINT_OUT=$(helm lint "$CHART_DIR" -f "$CHART_DIR/values-development.yaml" \
-     --set rabbitmq.useCloudProvider=false \
      --set redis.useCloudProvider=false \
      --set postgres.useCloudProvider=true \
      --set mongodb.useCloudProvider=true 2>&1)
@@ -52,7 +51,6 @@ fi
 info "Rendering Helm templates (development, non-cloud rabbitmq+redis)..."
 RENDERED=$(helm template stateful-services "$CHART_DIR" \
   -f "$CHART_DIR/values-development.yaml" \
-  --set rabbitmq.useCloudProvider=false \
   --set redis.useCloudProvider=false \
   --set postgres.useCloudProvider=true \
   --set mongodb.useCloudProvider=true 2>&1)
@@ -64,51 +62,6 @@ else
   pass "helm template render (development)"
 fi
 
-# 3. Check RabbitmqCluster is rendered
-info "Checking RabbitmqCluster resource is present in rendered output..."
-if echo "$RENDERED" | grep -q "kind: RabbitmqCluster"; then
-  pass "RabbitmqCluster resource rendered"
-else
-  fail "RabbitmqCluster resource NOT found in rendered output"
-fi
-
-# 4. Check ServiceMonitor is rendered
-info "Checking ServiceMonitor resource is present in rendered output..."
-if echo "$RENDERED" | grep -q "kind: ServiceMonitor"; then
-  pass "ServiceMonitor resource rendered"
-else
-  fail "ServiceMonitor resource NOT found in rendered output"
-fi
-
-# 5. Check NO legacy/raw StatefulSet for RabbitMQ (must be managed by Operator)
-info "Verifying no raw StatefulSet for rabbitmq is rendered (must use Operator)..."
-if echo "$RENDERED" | grep -q "kind: StatefulSet"; then
-  # StatefulSets from Redis are expected; check it's NOT for rabbitmq specifically
-  RMQSS=$(echo "$RENDERED" | grep -A5 "kind: StatefulSet" | grep "name: rabbitmq" || true)
-  if [ -n "$RMQSS" ]; then
-    fail "Raw RabbitMQ StatefulSet found – it should be managed by the Cluster Operator"
-  else
-    pass "No raw RabbitMQ StatefulSet (Operator-managed as expected)"
-  fi
-else
-  pass "No raw StatefulSets in rabbitmq-only render"
-fi
-
-# 6. Check RabbitmqCluster has required labels for ServiceMonitor discovery
-info "Verifying RabbitmqCluster has app.kubernetes.io/name: rabbitmq label..."
-if echo "$RENDERED" | grep -q "app.kubernetes.io/name: rabbitmq"; then
-  pass "RabbitmqCluster has required Operator label"
-else
-  fail "RabbitmqCluster MISSING app.kubernetes.io/name label"
-fi
-
-# 7. Confirm TLS is configured (disableNonTLSListeners)
-info "Checking TLS non-listener disable setting..."
-if echo "$RENDERED" | grep -q "disableNonTLSListeners: true"; then
-  pass "RabbitmqCluster has disableNonTLSListeners: true"
-else
-  fail "RabbitmqCluster MISSING disableNonTLSListeners setting"
-fi
 
 # 8. Verify monitoring-stack.yaml (chess legacy) is deleted
 info "Verifying legacy monitoring-stack.yaml has been deleted..."
