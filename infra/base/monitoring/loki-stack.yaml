@@ -25,7 +25,7 @@ spec:
             storageClassName: do-block-storage
             accessModes:
               - ReadWriteOnce
-            size: 50Gi
+            size: 10Gi
         promtail:
           # Fluent Bit owns the node log tailing path. Running both agents would
           # duplicate every container log in Loki.

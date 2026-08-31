@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: rabbitmq
     app.kubernetes.io/part-of: bookit
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: {{ .Values.rabbitmq.replicas | default 3 }}
   persistence:
@@ -75,7 +75,7 @@ metadata:
   name: bookit
   namespace: bookit
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   rabbitmqClusterReference:
     name: rabbitmq
@@ -88,7 +88,7 @@ metadata:
   name: bookit
   namespace: bookit
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   vhost: "/"
   user: bookit

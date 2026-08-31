@@ -1,4 +1,7 @@
-{{ if .Values.postgres.useCloudProvider }}
+{{- if .Values.postgres.useCloudProvider }}
+{{- if and .Values.postgres.host (ne .Values.postgres.host "") }}
+# ExternalName Service to route in-cluster traffic to the managed cloud Postgres.
+# Set postgres.host in your values file to the actual DigitalOcean DB hostname.
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,5 +9,6 @@ metadata:
   namespace: bookit
 spec:
   type: ExternalName
-  externalName: {{ if and .Values.global.multiRegion.enabled (eq .Values.global.currentRegion .Values.global.secondaryRegion) }}replica.postgres.cloud.bookit.com{{ else }}primary.postgres.cloud.bookit.com{{ end }}
-{{ end }}
+  externalName: {{ .Values.postgres.host }}
+{{- end }}
+{{- end }}

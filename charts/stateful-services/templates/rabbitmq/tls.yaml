@@ -5,7 +5,10 @@ metadata:
   name: rabbitmq-server
   namespace: bookit
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    # Wave 0: rabbitmq-ca ClusterIssuer (deployed by rabbitmq-topology-operator
+    # app at wave -2) must be Ready before this wave runs.
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   secretName: rabbitmq-server-tls
   duration: 2160h
@@ -35,7 +38,9 @@ metadata:
   name: rabbitmq-client
   namespace: bookit
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    # Wave 1: wait for the server cert (wave 0) before issuing client cert.
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   secretName: rabbitmq-client-tls
   commonName: bookit

@@ -1,4 +1,7 @@
-{{ if .Values.mongodb.useCloudProvider }}
+{{- if .Values.mongodb.useCloudProvider }}
+{{- if and .Values.mongodb.host (ne .Values.mongodb.host "") }}
+# ExternalName Service to route in-cluster traffic to the managed cloud MongoDB.
+# Set mongodb.host in your values file to the actual DigitalOcean DB hostname.
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,5 +9,6 @@ metadata:
   namespace: bookit
 spec:
   type: ExternalName
-  externalName: {{ if and .Values.global.multiRegion.enabled (eq .Values.global.currentRegion .Values.global.secondaryRegion) }}replica.mongodb.cloud.bookit.com{{ else }}primary.mongodb.cloud.bookit.com{{ end }}
-{{ end }}
+  externalName: {{ .Values.mongodb.host }}
+{{- end }}
+{{- end }}
