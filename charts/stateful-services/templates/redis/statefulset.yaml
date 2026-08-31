@@ -7,6 +7,9 @@ metadata:
 spec:
   serviceName: "redis-ha-headless"
   replicas: {{ .Values.redis.replicas | default 3 }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
   selector:
     matchLabels:
       app: redis-ha
@@ -75,6 +78,7 @@ spec:
     - metadata:
         name: data
       spec:
+        storageClassName: {{ .Values.redis.storageClassName | quote }}
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:

@@ -15,6 +15,7 @@ mongodb:
 
 redis:
   useCloudProvider: false
+  storageClassName: do-block-storage
 
 rabbitmq:
   useCloudProvider: true

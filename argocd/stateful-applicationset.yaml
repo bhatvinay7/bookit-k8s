@@ -32,7 +32,7 @@ spec:
             redis:
               useCloudProvider: false
             rabbitmq:
-              useCloudProvider: false
+              useCloudProvider: true
       destination:
         server: '{{server}}'
         namespace: bookit

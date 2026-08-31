@@ -1,25 +1,4 @@
 apiVersion: keda.sh/v1alpha1
-kind: TriggerAuthentication
-metadata:
-  name: rabbitmq-trigger-auth
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  secretTargetRef:
-  - parameter: ca
-    # Trust the CA that signed the certificate RabbitMQ is serving now. This
-    # stays correct while cert-manager rotates server and client certificates.
-    name: rabbitmq-server-tls
-    key: ca.crt
-  - parameter: cert
-    name: rabbitmq-client-tls
-    key: tls.crt
-  - parameter: key
-    name: rabbitmq-client-tls
-    key: tls.key
----
-apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: lock-server-rabbitmq
@@ -39,15 +18,12 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
-      tls: enable
+      hostFromEnv: RABBITMQ_URL
       protocol: amqp
       queueName: locking_queue
       mode: QueueLength
       value: "20"
       activationValue: "1"
-    authenticationRef:
-      name: rabbitmq-trigger-auth
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -69,15 +45,12 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
-      tls: enable
+      hostFromEnv: RABBITMQ_URL
       protocol: amqp
       queueName: payment_processing
       mode: QueueLength
       value: "5"
       activationValue: "1"
-    authenticationRef:
-      name: rabbitmq-trigger-auth
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -99,12 +72,9 @@ spec:
   triggers:
   - type: rabbitmq
     metadata:
-      host: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f
-      tls: enable
+      hostFromEnv: RABBITMQ_URL
       protocol: amqp
       queueName: notification_queue
       mode: QueueLength
       value: "20"
       activationValue: "1"
-    authenticationRef:
-      name: rabbitmq-trigger-auth
