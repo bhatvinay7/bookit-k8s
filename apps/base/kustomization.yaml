@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - rbac.yaml
 - cert-manager-issuer.yaml
+- rabbitmq-client-keystore-password.yaml
 - configmap.yaml
 - http-server.yaml
 - ws-server.yaml
@@ -27,11 +28,20 @@ patches:
       - name: rabbitmq-client-pem
         secret:
           secretName: rabbitmq-client-tls
+      - name: rabbitmq-server-ca
+        secret:
+          secretName: rabbitmq-server-tls
+          items:
+          - key: ca.crt
+            path: ca.crt
     - op: add
       path: /spec/template/spec/containers/0/volumeMounts
       value:
       - name: rabbitmq-client-pem
         mountPath: /rabbitmq-pem
+        readOnly: true
+      - name: rabbitmq-server-ca
+        mountPath: /rabbitmq-ca
         readOnly: true
 - target:
     kind: Deployment
@@ -43,7 +53,7 @@ patches:
       - name: RABBITMQ_URL
         value: amqps://rabbitmq.bookit.svc.cluster.local:5671/%2f?auth_mechanism=external
       - name: RABBITMQ_TLS_CA_PATH
-        value: /rabbitmq-pem/ca.crt
+        value: /rabbitmq-ca/ca.crt
       - name: RABBITMQ_TLS_IDENTITY_PATH
         value: /rabbitmq-pem/keystore.p12
       - name: RABBITMQ_TLS_IDENTITY_PASSWORD
@@ -64,7 +74,7 @@ patches:
       path: /spec/template/spec/containers/0/env/-
       value:
         name: RABBITMQ_TLS_CA_PATH
-        value: /rabbitmq-pem/ca.crt
+        value: /rabbitmq-ca/ca.crt
     - op: add
       path: /spec/template/spec/containers/0/env/-
       value:

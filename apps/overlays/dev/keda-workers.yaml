@@ -8,7 +8,9 @@ metadata:
 spec:
   secretTargetRef:
   - parameter: ca
-    name: rabbitmq-client-tls
+    # Trust the CA that signed the certificate RabbitMQ is serving now. This
+    # stays correct while cert-manager rotates server and client certificates.
+    name: rabbitmq-server-tls
     key: ca.crt
   - parameter: cert
     name: rabbitmq-client-tls

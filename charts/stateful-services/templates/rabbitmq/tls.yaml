@@ -29,18 +29,6 @@ spec:
     name: rabbitmq-ca
     kind: ClusterIssuer
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: rabbitmq-client-keystore-password
-  namespace: bookit
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
-type: Opaque
-data:
-  # PKCS#12 compatibility password; it is not a RabbitMQ login credential.
-  password: Ym9va2l0LXBrY3MxMg==
----
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
