@@ -129,13 +129,13 @@ patches:
         - name: prometheus.prometheusSpec.retention
           value: 3d
         - name: prometheus.prometheusSpec.resources.requests.cpu
-          value: 20m
+          value: 50m
         - name: prometheus.prometheusSpec.resources.requests.memory
-          value: 64Mi
+          value: 128Mi
         - name: prometheus.prometheusSpec.resources.limits.cpu
-          value: 100m
+          value: 500m
         - name: prometheus.prometheusSpec.resources.limits.memory
-          value: 256Mi
+          value: 512Mi
         - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage
           value: 2Gi
         - name: grafana.resources.requests.cpu
