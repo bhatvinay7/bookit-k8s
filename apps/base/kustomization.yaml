@@ -11,6 +11,7 @@ resources:
 - lock-server.yaml
 - notification-worker.yaml
 - payment-processor.yaml
+- outbox-server.yaml
 - search-server.yaml
 - web.yaml
 - ingress.yaml

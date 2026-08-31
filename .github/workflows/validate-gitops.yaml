@@ -40,6 +40,19 @@ jobs:
             kubectl kustomize "$target" >/dev/null
           done
 
+      - name: Validate outbox deployment contract
+        run: |
+          for target in apps/regions/dev/us-east apps/regions/prod/us-east apps/regions/prod/eu-west; do
+            rendered=$(mktemp)
+            kubectl kustomize "$target" > "$rendered"
+            grep -q 'name: outbox-server' "$rendered"
+            grep -q 'name: migrate-payment-outbox' "$rendered"
+            grep -q 'name: DATABASE_URL' "$rendered"
+            grep -q 'name: RABBITMQ_URL' "$rendered"
+            grep -q 'PAYMENT_MESSAGE_TTL_MS:' "$rendered"
+            rm "$rendered"
+          done
+
       - name: Reject plaintext secret manifests
         run: |
           if git grep -n -E '^kind: Secret$|^stringData:' -- '*.yaml' '*.yml'; then

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app: outbox-server
+  name: outbox-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: outbox-server
+  template:
+    metadata:
+      labels:
+        app: outbox-server
+    spec:
+      initContainers:
+      - args:
+        - --migrate-only
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: DATABASE_URL
+              name: backend-secrets
+        image: bookit-outbox-server:latest
+        name: migrate-payment-outbox
+      containers:
+      - env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: DATABASE_URL
+              name: backend-secrets
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              key: RABBITMQ_URL
+              name: backend-secrets
+        envFrom:
+        - configMapRef:
+            name: bookit-config
+        image: bookit-outbox-server:latest
+        name: outbox-server
+        resources:
+          limits:
+            cpu: 150m
+            memory: 192Mi
+          requests:
+            cpu: 25m
+            memory: 64Mi
+      imagePullSecrets:
+      - name: ghcr-secret
+      serviceAccountName: bookit-app

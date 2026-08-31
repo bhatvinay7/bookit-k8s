@@ -12,6 +12,7 @@ data:
   SEARCH_HTTP_PORT: "8084"
   SEARCH_GRPC_PORT: "50051"
   METRICS_PORT: "9100"
+  PAYMENT_MESSAGE_TTL_MS: "300000"
   LOG_LEVEL: "info"
   NODE_ENV: "production"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.monitoring.svc.cluster.local:4317"

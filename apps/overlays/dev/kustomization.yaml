@@ -25,7 +25,14 @@ labels:
 # A test cluster may burst to two pods per workload without allowing a noisy
 # service to consume the complete node.
 patches:
-- path: delete-worker-hpas.yaml
+- patch: |-
+    $patch: delete
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: unused
+  target:
+    kind: HorizontalPodAutoscaler
 - patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0
@@ -101,6 +108,9 @@ images:
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
   newTag: commit-6b0e086
+- name: bookit-outbox-server
+  newName: ghcr.io/bhatvinay7/bookit-outbox-server
+  newTag: commit-5ff4191
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
   newTag: commit-6b0e086
