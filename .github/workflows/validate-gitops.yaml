@@ -2,9 +2,10 @@ name: Validate GitOps Manifests
 
 on:
   pull_request:
-    branches: [dev, main]
+    branches: [deployment1, main] # dev commented out / replaced
   push:
-    branches: [dev]
+    # branches: [dev]
+    branches: [deployment1]
 
 concurrency:
   group: validate-gitops-${{ github.ref }}

@@ -17,4 +17,4 @@ redis:
   useCloudProvider: false
 
 rabbitmq:
-  useCloudProvider: false
+  useCloudProvider: true
