@@ -11,7 +11,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/bhatvinay7/bookit-k8s.git
-    targetRevision: development
+    targetRevision: deployment1
     path: operators/rabbitmq-cluster
   destination:
     server: https://kubernetes.default.svc
@@ -38,7 +38,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/bhatvinay7/bookit-k8s.git
-    targetRevision: development
+    targetRevision: deployment1
     path: operators/rabbitmq-topology
   destination:
     server: https://kubernetes.default.svc

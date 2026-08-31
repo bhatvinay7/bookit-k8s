@@ -18,7 +18,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/bhatvinay7/bookit-k8s.git'
-        targetRevision: development
+        targetRevision: deployment1
         path: charts/stateful-services
         helm:
           releaseName: stateful-services
