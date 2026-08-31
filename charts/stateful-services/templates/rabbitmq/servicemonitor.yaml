@@ -1,0 +1,33 @@
+{{- if not .Values.rabbitmq.useCloudProvider }}
+# The RabbitMQ Cluster Operator automatically enables the rabbitmq_prometheus
+# plugin and exposes metrics on port 15692 (/metrics). This ServiceMonitor
+# tells the Prometheus Operator (kube-prometheus-stack) to discover and scrape
+# those metrics automatically.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rabbitmq
+  namespace: bookit
+  labels:
+    # This label is required for kube-prometheus-stack to discover the monitor
+    # when serviceMonitorSelector is set to {} (match all).
+    release: kube-prometheus-stack
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  endpoints:
+    - port: prometheus
+      scheme: http
+      path: /metrics
+      interval: 30s
+  # The Cluster Operator creates a Service named <cluster-name>-nodes in the
+  # same namespace with a "prometheus" named port pointing to 15692.
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: rabbitmq
+      app.kubernetes.io/name: rabbitmq
+  namespaceSelector:
+    matchNames:
+      - bookit
+{{- end }}
