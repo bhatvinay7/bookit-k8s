@@ -23,6 +23,13 @@ spec:
         xpack.security.enabled: false
       podTemplate:
         spec:
+          initContainers:
+            - name: install-plugins
+              command:
+                - sh
+                - -c
+                - |
+                  bin/elasticsearch-plugin install --batch analysis-phonetic
           containers:
             - name: elasticsearch
               # Test profile, per Elasticsearch node. Three nodes can reserve
