@@ -95,28 +95,28 @@ patches:
 images:
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-6b0e086
-- name: bookit-payment-processor
-  newName: ghcr.io/bhatvinay7/bookit-payment-processor
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-5ff4191
+  newTag: commit-d6f98b7
+- name: bookit-payment-processor
+  newName: ghcr.io/bhatvinay7/bookit-payment-processor
+  newTag: commit-d6f98b7
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-6b0e086
+  newTag: commit-d6f98b7
