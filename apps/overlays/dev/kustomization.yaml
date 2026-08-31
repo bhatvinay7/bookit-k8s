@@ -116,7 +116,7 @@ images:
   newTag: commit-07ae003
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-07ae003
+  newTag: commit-7e5b341
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-07ae003
