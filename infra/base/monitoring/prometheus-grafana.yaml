@@ -55,6 +55,15 @@ spec:
         prometheus:
           prometheusSpec:
             retention: 15d
+            # DigitalOcean block storage StorageClass is required or PVCs stay Pending.
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: do-block-storage
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
             serviceMonitorSelectorNilUsesHelmValues: false
             serviceMonitorSelector: {}
             serviceMonitorNamespaceSelector: {}
@@ -71,3 +80,5 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      # Required for large CRDs that exceed annotation size limits
+      - ReplaceResourceSyncOptions=true

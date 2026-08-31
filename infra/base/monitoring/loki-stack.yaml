@@ -20,6 +20,11 @@ spec:
           isDefault: false
           persistence:
             enabled: true
+            # Explicit StorageClass required for DigitalOcean block storage.
+            # Without this, the PVC stays Pending indefinitely.
+            storageClassName: do-block-storage
+            accessModes:
+              - ReadWriteOnce
             size: 50Gi
         promtail:
           # Fluent Bit owns the node log tailing path. Running both agents would
@@ -34,3 +39,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true

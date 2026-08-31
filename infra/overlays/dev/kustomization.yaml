@@ -136,6 +136,8 @@ patches:
           value: 500m
         - name: prometheus.prometheusSpec.resources.limits.memory
           value: 512Mi
+        - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName
+          value: do-block-storage
         - name: prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage
           value: 2Gi
         - name: grafana.resources.requests.cpu

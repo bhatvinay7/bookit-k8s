@@ -170,10 +170,10 @@ echo "=============================="
 
 CHART_VERSION=$(grep "^version:" "$CHART_DIR/Chart.yaml" | awk '{print $2}')
 info "Current chart version: $CHART_VERSION"
-if [[ "$CHART_VERSION" == "1.0.0" ]]; then
-  pass "Chart version is 1.0.0 (latest)"
+if [[ "$CHART_VERSION" == "1.0.1" ]]; then
+  pass "Chart version is 1.0.1 (latest)"
 else
-  fail "Chart version is $CHART_VERSION - expected 1.0.0"
+  fail "Chart version is $CHART_VERSION - expected 1.0.1"
 fi
 
 # -----------------------------------------------------------------------------

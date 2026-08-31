@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
 - rbac.yaml
 - cert-manager-issuer.yaml
-- rabbitmq-client-keystore-password.yaml
 - configmap.yaml
 - http-server.yaml
 - ws-server.yaml
