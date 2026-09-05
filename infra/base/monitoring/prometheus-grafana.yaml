@@ -16,6 +16,7 @@ spec:
     helm:
       values: |
         grafana:
+          adminPassword: admin
           ingress:
             enabled: true
             ingressClassName: nginx

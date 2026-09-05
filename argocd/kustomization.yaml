@@ -4,6 +4,7 @@ resources:
   - argocd-cert-manager.yaml
   - argocd-sealed-secrets.yaml
   - argocd-ingress.yaml
+  - argocd-admin-secret.yaml
 
 # Apply dev-apps.yaml or prod-apps.yaml explicitly from the branch-aware
 # bootstrap workflow. Including both here could target the wrong environment.
