@@ -17,7 +17,8 @@ spec:
         app: outbox-server
     spec:
       initContainers:
-      - args:
+      - command: ["outbox-server"]
+        args:
         - --migrate-only
         env:
         - name: DATABASE_URL
