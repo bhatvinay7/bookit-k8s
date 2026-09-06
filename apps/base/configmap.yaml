@@ -12,6 +12,7 @@ data:
   WS_PORT: '8081'
   HTTP_SERVER_URL: 'http://http-server:8082'
   SEARCH_SERVER_GRPC_URL: 'http://search-server:50051'
+  CORS_ALLOWED_ORIGINS: 'http://localhost:3000,https://web.bookit4u.shop,https://admin.bookit4u.shop,http://web.bookit4u.shop,http://api.bookit4u.shop,https://api.bookit4u.shop'
 kind: ConfigMap
 metadata:
   labels:
