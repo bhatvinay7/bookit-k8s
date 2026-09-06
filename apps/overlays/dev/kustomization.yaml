@@ -92,6 +92,36 @@ patches:
           ephemeral-storage: 512Mi
   target:
     kind: Deployment
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+          ephemeral-storage: 64Mi
+        limits:
+          cpu: 1000m
+          memory: 256Mi
+          ephemeral-storage: 512Mi
+  target:
+    kind: Deployment
+    name: gateway-keeper
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+          ephemeral-storage: 64Mi
+        limits:
+          cpu: 1000m
+          memory: 512Mi
+          ephemeral-storage: 512Mi
+  target:
+    kind: Deployment
+    name: web
 images:
 - name: bookit-cdc-worker
   newName: ghcr.io/bhatvinay7/bookit-cdc-worker
