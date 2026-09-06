@@ -1,7 +1,8 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bookit-monitoring-dashboards
+  name: bookit-monitoring-dashboards-fluentbit
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
@@ -6328,6 +6329,15 @@ data:
       "uid": "5b64379ae97d471bb733c16fa5494f98",
       "version": 1
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookit-monitoring-dashboards-k8s
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
   k8s.json: |-
     {
       "__inputs": [
@@ -8408,6 +8418,15 @@ data:
       "links": [],
       "gnetId": 315
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookit-monitoring-dashboards-loki
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
   loki.json: |-
     {
       "__inputs": [
@@ -12174,6 +12193,15 @@ data:
       "uid": "MQHVDmtWk",
       "version": 37
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookit-monitoring-dashboards-otel
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
   otel.json: |-
     {
       "__inputs": [],
@@ -13640,6 +13668,15 @@ data:
       "version": 1,
       "weekStart": ""
     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookit-monitoring-dashboards-tempo
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
   tempo.json: |-
     {
       "__inputs": [
