@@ -61,6 +61,12 @@ data:
           grpc:
           http:
 
+    connectors:
+      spanmetrics:
+        histogram:
+          explicit:
+            buckets: [2ms, 5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s]
+
     processors:
       memory_limiter:
         check_interval: 1s
@@ -106,9 +112,9 @@ data:
         traces:
           receivers: [otlp]
           processors: [memory_limiter, resource, batch]
-          exporters: [otlp/tempo]
+          exporters: [spanmetrics, otlp/tempo]
         metrics:
-          receivers: [otlp]
+          receivers: [otlp, spanmetrics]
           processors: [memory_limiter, resource, batch]
           exporters: [prometheus]
         logs:
