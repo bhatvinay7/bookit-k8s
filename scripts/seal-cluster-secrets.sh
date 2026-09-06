@@ -67,15 +67,16 @@ kubeseal_args=(
   --format yaml
 )
 seal() {
-  local secret_name="$1"
-  local output="$2"
-  shift 2
-  kubectl --context "$kube_context" -n bookit create secret generic "$secret_name" \
+  local namespace="$1"
+  local secret_name="$2"
+  local output="$3"
+  shift 3
+  kubectl --context "$kube_context" -n "$namespace" create secret generic "$secret_name" \
     "$@" --dry-run=client -o yaml |
     kubeseal "${kubeseal_args[@]}" > "${out_dir}/${output}"
 }
 
-seal backend-secrets sealed-backend-secrets.yaml \
+seal bookit backend-secrets sealed-backend-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=DATABASE_URL="$DATABASE_URL" \
@@ -115,7 +116,7 @@ seal backend-secrets sealed-backend-secrets.yaml \
   --from-literal=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
   --from-literal=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
-seal frontend-secrets sealed-frontend-secrets.yaml \
+seal bookit frontend-secrets sealed-frontend-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
@@ -127,7 +128,7 @@ seal frontend-secrets sealed-frontend-secrets.yaml \
   --from-literal=NEXT_PUBLIC_RAZORPAY_KEY_ID="$NEXT_PUBLIC_RAZORPAY_KEY_ID" \
   --from-literal=NEXT_PUBLIC_USE_REMOTE_STOCKFISH="$NEXT_PUBLIC_USE_REMOTE_STOCKFISH"
 
-seal bookit-secrets sealed-platform-secrets.yaml \
+seal bookit bookit-secrets sealed-platform-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=CLOUDFLARE_R2_ACCOUNT_ID="$CLOUDFLARE_R2_ACCOUNT_ID" \
@@ -142,7 +143,7 @@ seal bookit-secrets sealed-platform-secrets.yaml \
   --from-literal=AWS_DEFAULT_REGION="auto"
 
 # Keep legacy RabbitMQ values until rabbitmq-ha-v6 is confirmed pruned.
-seal custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
+seal bookit custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
   --from-literal=mongodb-root-password="${CUSTOM_DB_MONGODB_ROOT_PASSWORD:-}" \
   --from-literal=mongodb-replica-set-key="${CUSTOM_DB_MONGODB_REPLICA_SET_KEY:-}" \
   --from-literal=mongodb-exporter-uri="${CUSTOM_DB_MONGODB_EXPORTER_URI:-}" \
@@ -172,3 +173,7 @@ printf '%s\n' \
   '- sealed-ghcr-secret.yaml' > "${out_dir}/kustomization.yaml"
 
 echo "sealed ${environment}/${region} secrets for context ${kube_context}"
+
+# Monitoring/Alertmanager Secrets
+seal monitoring alertmanager-secret sealed-alertmanager-secret.yaml \
+  --from-literal=smtp_auth_password="$GMAIL_APP_PASSWORD"
