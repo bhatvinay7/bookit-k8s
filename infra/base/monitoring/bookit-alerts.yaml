@@ -1,0 +1,49 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: bookit-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  groups:
+    - name: bookit.rules
+      rules:
+        # RED Method Alerts (Application level)
+        - alert: HighErrorRate
+          expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 0.05
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: High HTTP error rate on {{ $labels.job }}
+            description: "{{ $labels.job }} has an error rate of > 5% over the last 5 minutes."
+
+        - alert: HighLatency
+          # Placeholder expression for latency if histogram metrics exist
+          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High latency on {{ $labels.job }}
+            description: "95th percentile latency on {{ $labels.job }} is over 2 seconds for 5 minutes."
+
+        # USE Method Alerts (Infrastructure level)
+        - alert: PodCrashLoopBackOff
+          expr: rate(kube_pod_container_status_restarts_total{namespace="bookit"}[5m]) > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Pod crashlooping in {{ $labels.namespace }}
+            description: "Pod {{ $labels.pod }} is crashlooping."
+
+        - alert: HighMemoryUsage
+          expr: sum(container_memory_usage_bytes{namespace="bookit", container!=""}) by (pod) / sum(kube_pod_container_resource_limits{resource="memory", namespace="bookit"}) by (pod) > 0.90
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High Memory Usage on {{ $labels.pod }}
+            description: "Pod {{ $labels.pod }} is using over 90% of its memory limit."

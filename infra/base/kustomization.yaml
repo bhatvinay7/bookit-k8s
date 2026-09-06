@@ -11,3 +11,4 @@ resources:
   - monitoring/otel-collector-monitor.yaml
   - monitoring/tempo.yaml
   - monitoring/grafana-dashboards.yaml
+  - monitoring/bookit-alerts.yaml

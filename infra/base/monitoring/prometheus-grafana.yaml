@@ -15,6 +15,30 @@ spec:
     targetRevision: 51.2.0
     helm:
       values: |
+        alertmanager:
+          config:
+            global:
+              resolve_timeout: 5m
+              smtp_smarthost: 'smtp.gmail.com:587'
+              smtp_from: 'alerts@bookit4u.shop'
+              smtp_auth_username: 'tickethandle24@gmail.com'
+              smtp_auth_password: 'SET_YOUR_GMAIL_APP_PASSWORD_HERE'
+              smtp_require_tls: true
+            route:
+              group_by: ['namespace', 'alertname']
+              group_wait: 30s
+              group_interval: 5m
+              repeat_interval: 12h
+              receiver: 'email-notifications'
+              routes:
+                - matchers:
+                    - severity="critical"
+                  receiver: 'email-notifications'
+            receivers:
+              - name: 'email-notifications'
+                email_configs:
+                  - to: 'tickethandle24@gmail.com'
+                    send_resolved: true
         grafana:
           adminPassword: admin
           ingress:
