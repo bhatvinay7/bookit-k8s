@@ -60,9 +60,14 @@ spec:
             enabled: true
             ingressClassName: nginx
             annotations:
-              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+              cert-manager.io/cluster-issuer: "letsencrypt-prod"
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
             hosts:
               - grafana.bookit4u.shop
+            tls:
+              - secretName: grafana-bookit-shop-tls
+                hosts:
+                  - grafana.bookit4u.shop
           sidecar:
             dashboards:
               enabled: true
