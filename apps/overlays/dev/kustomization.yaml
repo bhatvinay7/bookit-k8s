@@ -120,3 +120,6 @@ images:
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-e80121b
+- name: bookit-cdc-worker
+  newName: ghcr.io/bhatvinay7/bookit-cdc-worker
+  newTag: commit-e80121b
