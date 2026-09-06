@@ -16,4 +16,4 @@ resources:
 - web.yaml
 - ingress.yaml
 - grpc-ingress.yaml
-- ../../infra/base/monitoring/bookit-alerts.yaml
+- monitoring/bookit-alerts.yaml
