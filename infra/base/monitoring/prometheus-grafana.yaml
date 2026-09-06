@@ -26,7 +26,7 @@ spec:
             hosts:
               - grafana.bookit4u.shop
             tls:
-              - secretName: grafana-boookit-shop-tls
+              - secretName: grafana-bookit-shop-tls
                 hosts:
                   - grafana.bookit4u.shop
           sidecar:

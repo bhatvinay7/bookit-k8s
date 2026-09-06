@@ -15,7 +15,7 @@ spec:
   tls:
     - hosts:
         - grpc.bookit4u.shop
-      secretName: grpc-boookit-shop-tls
+      secretName: grpc-bookit-shop-tls
   rules:
     - host: grpc.bookit4u.shop
       http:

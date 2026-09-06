@@ -58,7 +58,7 @@ patches:
       path: /spec/tls/0/hosts/3
     - op: replace
       path: /spec/tls/0/secretName
-      value: dev-boookit-shop-tls
+      value: dev-bookit-shop-tls
   target:
     kind: Ingress
     name: bookit-ingress
@@ -71,7 +71,7 @@ patches:
       value: grpc.dev.bookit4u.shop
     - op: replace
       path: /spec/tls/0/secretName
-      value: grpc-dev-boookit-shop-tls
+      value: grpc-dev-bookit-shop-tls
   target:
     kind: Ingress
     name: bookit-grpc-ingress
