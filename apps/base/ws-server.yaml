@@ -21,27 +21,27 @@ spec:
         - configMapRef:
             name: bookit-config
         image: bookit-ws-server:latest
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          tcpSocket:
+            port: 8081
         name: ws-server
         ports:
         - containerPort: 8081
           name: http
-        resources:
-          limits:
-            cpu: 200m
-            memory: 256Mi
-          requests:
-            cpu: 50m
-            memory: 128Mi
         readinessProbe:
-          tcpSocket:
-            port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-        livenessProbe:
           tcpSocket:
             port: 8081
-          initialDelaySeconds: 15
-          periodSeconds: 20
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
       imagePullSecrets:
       - name: ghcr-secret
       serviceAccountName: bookit-app
@@ -60,22 +60,3 @@ spec:
   selector:
     app: ws-server
   type: ClusterIP
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: ws-server-hpa
-spec:
-  maxReplicas: 5
-  metrics:
-  - resource:
-      name: cpu
-      target:
-        averageUtilization: 75
-        type: Utilization
-    type: Resource
-  minReplicas: 1
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: ws-server

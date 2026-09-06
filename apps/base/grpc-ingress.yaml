@@ -1,29 +1,29 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: bookit-grpc-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
   labels:
     app: bookit
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  name: bookit-grpc-ingress
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - grpc.bookit4u.shop
-      secretName: grpc-bookit-shop-tls
   rules:
-    - host: grpc.bookit4u.shop
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: gateway-keeper
-                port:
-                  number: 50052
+  - host: grpc.bookit4u.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: gateway-keeper
+            port:
+              number: 50052
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - grpc.bookit4u.shop
+    secretName: grpc-bookit-shop-tls

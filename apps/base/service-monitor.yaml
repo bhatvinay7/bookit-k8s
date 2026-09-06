@@ -1,21 +1,21 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: bookit-apps-monitor
-  namespace: bookit
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     release: prometheus
+  name: bookit-apps-monitor
+  namespace: bookit
 spec:
-  selector:
-    matchExpressions:
-      - key: app
-        operator: Exists
   endpoints:
-  - port: http
+  - interval: 15s
     path: /metrics
-    interval: 15s
+    port: http
   namespaceSelector:
     matchNames:
-      - bookit
+    - bookit
+  selector:
+    matchExpressions:
+    - key: app
+      operator: Exists

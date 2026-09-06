@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: '1'
   labels:
     app: outbox-server
   name: outbox-server
@@ -16,18 +16,6 @@ spec:
       labels:
         app: outbox-server
     spec:
-      initContainers:
-      - command: ["outbox-server"]
-        args:
-        - --migrate-only
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: DATABASE_URL
-              name: backend-secrets
-        image: bookit-outbox-server:latest
-        name: migrate-payment-outbox
       containers:
       - env:
         - name: DATABASE_URL
@@ -47,11 +35,24 @@ spec:
         name: outbox-server
         resources:
           limits:
-            cpu: 150m
-            memory: 192Mi
-          requests:
-            cpu: 25m
+            cpu: 100m
             memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
       imagePullSecrets:
       - name: ghcr-secret
+      initContainers:
+      - args:
+        - --migrate-only
+        command:
+        - outbox-server
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              key: DATABASE_URL
+              name: backend-secrets
+        image: bookit-outbox-server:latest
+        name: migrate-payment-outbox
       serviceAccountName: bookit-app

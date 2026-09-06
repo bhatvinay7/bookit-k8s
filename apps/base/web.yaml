@@ -21,28 +21,28 @@ spec:
         - configMapRef:
             name: bookit-config
         image: bookit-web:latest
-        name: web
-        ports:
-        - containerPort: 3000
-        resources:
-          limits:
-            cpu: 200m
-            memory: 256Mi
-          requests:
-            cpu: 50m
-            memory: 128Mi
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /
             port: 3000
           initialDelaySeconds: 15
           periodSeconds: 20
+        name: web
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
       imagePullSecrets:
       - name: ghcr-secret
       serviceAccountName: bookit-app
@@ -61,22 +61,3 @@ spec:
   selector:
     app: web
   type: ClusterIP
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: web-hpa
-spec:
-  maxReplicas: 5
-  metrics:
-  - resource:
-      name: cpu
-      target:
-        averageUtilization: 75
-        type: Utilization
-    type: Resource
-  minReplicas: 1
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: web

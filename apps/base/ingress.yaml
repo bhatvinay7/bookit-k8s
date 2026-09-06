@@ -1,61 +1,61 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: bookit-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
   labels:
     app: bookit
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: bookit-ingress
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - api.bookit4u.shop
-        - ws.bookit4u.shop
-        - web.bookit4u.shop
-        - bookit4u.shop
-      secretName: bookit-shop-tls
   rules:
-    - host: api.bookit4u.shop
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: gateway-keeper
-                port:
-                  number: 8080
-    - host: ws.bookit4u.shop
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: ws-server
-                port:
-                  number: 8081
-    - host: web.bookit4u.shop
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: web
-                port:
-                  number: 3000
-    - host: bookit4u.shop
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: web
-                port:
-                  number: 3000
+  - host: api.bookit4u.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: gateway-keeper
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  - host: ws.bookit4u.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: ws-server
+            port:
+              number: 8081
+        path: /
+        pathType: Prefix
+  - host: web.bookit4u.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: web
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix
+  - host: bookit4u.shop
+    http:
+      paths:
+      - backend:
+          service:
+            name: web
+            port:
+              number: 3000
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - api.bookit4u.shop
+    - ws.bookit4u.shop
+    - web.bookit4u.shop
+    - bookit4u.shop
+    secretName: bookit-shop-tls
