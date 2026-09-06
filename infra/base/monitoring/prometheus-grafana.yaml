@@ -39,7 +39,22 @@ spec:
                 email_configs:
                   - to: 'tickethandle24@gmail.com'
                     send_resolved: true
+          alertmanagerSpec:
+            resources:
+              requests:
+                cpu: 10m
+                memory: 20Mi
+              limits:
+                cpu: 50m
+                memory: 100Mi
         grafana:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 200Mi
           adminPassword: admin
           ingress:
             enabled: true
@@ -64,6 +79,22 @@ spec:
               uid: tempo
               url: http://tempo.monitoring.svc.cluster.local:3200
               access: proxy
+        kube-state-metrics:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+        prometheus-node-exporter:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
         additionalServiceMonitors:
           - name: otel-collector
             namespace: monitoring
@@ -77,8 +108,23 @@ spec:
               - port: metrics
                 path: /metrics
                 interval: 15s
+        prometheusOperator:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 200Mi
         prometheus:
           prometheusSpec:
+            resources:
+              requests:
+                cpu: 10m
+                memory: 100Mi
+              limits:
+                cpu: 300m
+                memory: 512Mi
             retention: 15d
             # DigitalOcean block storage StorageClass is required or PVCs stay Pending.
             storageSpec:
