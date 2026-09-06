@@ -16,6 +16,13 @@ mongodb:
 redis:
   useCloudProvider: false
   storageClassName: do-block-storage
+  resources:
+    requests:
+      cpu: "1"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
 
 rabbitmq:
   useCloudProvider: true
