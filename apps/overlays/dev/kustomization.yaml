@@ -10,6 +10,7 @@ configMapGenerator:
 - behavior: merge
   literals:
   - NODE_ENV=development
+  - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://dev.bookit4u.shop,https://api.dev.bookit4u.shop,https://ws.dev.bookit4u.shop
   name: bookit-config
 
 labels:
