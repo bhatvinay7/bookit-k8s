@@ -34,6 +34,18 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8084
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8084
+          initialDelaySeconds: 15
+          periodSeconds: 20
       imagePullSecrets:
       - name: ghcr-secret
       serviceAccountName: bookit-app

@@ -2,17 +2,17 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: ws-server
-  name: ws-server
+    app: cdc-worker
+  name: cdc-worker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ws-server
+      app: cdc-worker
   template:
     metadata:
       labels:
-        app: ws-server
+        app: cdc-worker
     spec:
       containers:
       - envFrom:
@@ -20,51 +20,23 @@ spec:
             name: backend-secrets
         - configMapRef:
             name: bookit-config
-        image: bookit-ws-server:latest
-        name: ws-server
-        ports:
-        - containerPort: 8081
-          name: http
+        image: bookit-cdc-worker:latest
+        name: cdc-worker
         resources:
           limits:
-            cpu: 200m
+            cpu: 250m
             memory: 256Mi
           requests:
             cpu: 50m
             memory: 128Mi
-        readinessProbe:
-          tcpSocket:
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          tcpSocket:
-            port: 8081
-          initialDelaySeconds: 15
-          periodSeconds: 20
       imagePullSecrets:
       - name: ghcr-secret
       serviceAccountName: bookit-app
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: ws-server
-  name: ws-server
-spec:
-  ports:
-  - name: http
-    port: 8081
-    targetPort: 8081
-  selector:
-    app: ws-server
-  type: ClusterIP
----
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: ws-server-hpa
+  name: cdc-worker-hpa
 spec:
   maxReplicas: 5
   metrics:
@@ -78,4 +50,4 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: ws-server
+    name: cdc-worker

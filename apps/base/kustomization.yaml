@@ -12,6 +12,7 @@ resources:
 - notification-worker.yaml
 - payment-processor.yaml
 - outbox-server.yaml
+- cdc-worker.yaml
 - search-server.yaml
 - web.yaml
 - ingress.yaml
