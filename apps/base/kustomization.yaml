@@ -9,6 +9,7 @@ resources:
 - gateway-keeper.yaml
 - lock-server.yaml
 - notification-worker.yaml
+- delivery-egress.yaml
 - payment-processor.yaml
 - outbox-server.yaml
 - cdc-worker.yaml

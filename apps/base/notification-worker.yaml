@@ -29,16 +29,11 @@ spec:
             secretKeyRef:
               name: backend-secrets
               key: SMTP_HOST
+        # Require STARTTLS on the outbound SMTP connection.
         - name: SMTP_PORT
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: SMTP_PORT
+          value: "587"
         - name: SMTP_SECURE
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: SMTP_SECURE
+          value: "false"
         - name: SMTP_USER
           valueFrom:
             secretKeyRef:

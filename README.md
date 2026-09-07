@@ -460,7 +460,8 @@ successful manifest render proves syntax and composition, not runtime safety.
 
 The HTTP deployment explicitly reads R2 keys from `backend-secrets` and derives
 its S3 endpoint from the account ID. The notification deployment explicitly
-reads SMTP and Gmail settings from the same secret. Legacy `bookit-secrets`
+reads SMTP credentials and Gmail settings from the same secret, and explicitly
+sets `SMTP_PORT=587` and `SMTP_SECURE=false` (required STARTTLS) in the Deployment. Legacy `bookit-secrets`
 values cannot override those keys. An `.env` file on your workstation is not
 loaded into a Kubernetes pod automatically.
 
@@ -501,7 +502,9 @@ kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout status deployment/notifica
 ```
 
 Gmail defaults to port 465 with `SMTP_SECURE=true` (implicit TLS). If you use port
-587, set `SMTP_SECURE=false` for required STARTTLS. The worker supports
+587, update the Deployment to `SMTP_PORT=587` and `SMTP_SECURE=false` for
+required STARTTLS; changing only the Secret does not override explicit Deployment
+values. The worker supports
 `SMTP_USER`/`SMTP_PASS` with `SMTP_FROM`; Gmail credentials are used when both
 SMTP credential fields are absent. Missing credentials are an error outside
 explicit test mode. `Network is unreachable` still requires working pod DNS,
@@ -516,3 +519,17 @@ email unless a `booking_email_sent` audit exists. Previously acknowledged failur
 must be recovered from their original booking event; deploying this change does
 not replay them automatically. SMTP delivery is at least once: if sending succeeds
 but saving its audit fails, replay can send a duplicate email.
+
+### Outbound policy for delivery services
+
+`apps/base/delivery-egress.yaml` allows all outbound destinations, ports and
+protocols for pods labeled `app=notification-worker` or `app=http-server`.
+All regional app overlays include this policy. It covers SMTP, R2 HTTPS, DNS,
+and internal service connections. It does not change ingress access.
+
+This allows egress at the standard Kubernetes NetworkPolicy layer, including
+when another standard policy selects these pods with default-deny egress.
+Enforcement requires a NetworkPolicy-capable CNI. Node firewalls, provider SMTP
+restrictions, routing failures, and higher-priority CNI-specific policies must
+be checked separately if connections still fail. Argo CD must sync the policy
+from the branch configured for the target application before it takes effect.
