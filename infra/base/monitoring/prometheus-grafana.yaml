@@ -79,6 +79,11 @@ spec:
               uid: tempo
               url: http://tempo.monitoring.svc.cluster.local:3200
               access: proxy
+            - name: Loki
+              type: loki
+              uid: loki
+              url: http://loki-stack.monitoring.svc.cluster.local:3100
+              access: proxy
         kube-state-metrics:
           resources:
             requests:
@@ -95,19 +100,7 @@ spec:
             limits:
               cpu: 50m
               memory: 64Mi
-        additionalServiceMonitors:
-          - name: otel-collector
-            namespace: monitoring
-            selector:
-              matchLabels:
-                app: otel-collector
-            namespaceSelector:
-              matchNames:
-                - monitoring
-            endpoints:
-              - port: metrics
-                path: /metrics
-                interval: 15s
+
         prometheusOperator:
           resources:
             requests:

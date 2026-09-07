@@ -1,11 +1,15 @@
-
-apiVersion: policy/v1
-kind: PodDisruptionBudget
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
 metadata:
   name: otel-collector
   namespace: monitoring
+  labels:
+    app: otel-collector
 spec:
-  minAvailable: 1
   selector:
     matchLabels:
       app: otel-collector
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s

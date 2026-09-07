@@ -68,7 +68,7 @@ patches:
           ephemeral-storage: 64Mi
         limits:
           cpu: 100m
-          memory: 256Mi
+          memory: 1Gi
           ephemeral-storage: 512Mi
 
 

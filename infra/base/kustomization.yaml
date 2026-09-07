@@ -9,5 +9,6 @@ resources:
   - monitoring/fluent-bit.yaml
   - monitoring/otel-collector.yaml
   - monitoring/otel-collector-monitor.yaml
+  - monitoring/otel-collector-pdb.yaml
   - monitoring/tempo.yaml
   - monitoring/grafana-dashboards.yaml
