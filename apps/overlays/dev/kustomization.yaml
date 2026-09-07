@@ -129,13 +129,13 @@ images:
   newTag: commit-dc2c184
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-dc2c184
+  newTag: commit-feacf3a
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-dd4980b
+  newTag: commit-feacf3a
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-dc2c184
+  newTag: commit-feacf3a
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
   newTag: commit-dc2c184
@@ -153,4 +153,4 @@ images:
   newTag: commit-dc2c184
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-dc2c184
+  newTag: commit-feacf3a
