@@ -23,10 +23,9 @@ spec:
         - configMapRef:
             name: bookit-config
         env:
-        # Port 465 = implicit TLS (SMTPS) — works even when cloud providers
-        # block outbound port 587 (STARTTLS). Override the sealed-secret value.
+        # Use port 587 (STARTTLS) for Gmail SMTP as requested.
         - name: SMTP_PORT
-          value: "465"
+          value: "587"
         - name: SMTP_HOST
           value: "smtp.gmail.com"
         image: bookit-notification-worker:latest
