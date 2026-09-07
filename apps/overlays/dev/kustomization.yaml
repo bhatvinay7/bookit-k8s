@@ -138,7 +138,7 @@ images:
   newTag: commit-feacf3a
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-5a5a1fe
+  newTag: commit-151ca30
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
   newTag: commit-b6acd5b
