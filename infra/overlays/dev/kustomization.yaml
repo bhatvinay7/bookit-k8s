@@ -165,6 +165,12 @@ patches:
           value: "false"
         - name: grafana.persistence.size
           value: 1Gi
+        - name: grafana.ingress.hosts[0]
+          value: grafana.dev.bookit4u.shop
+        - name: grafana.ingress.tls[0].secretName
+          value: grafana-dev-bookit-shop-tls
+        - name: grafana.ingress.tls[0].hosts[0]
+          value: grafana.dev.bookit4u.shop
         - name: alertmanager.alertmanagerSpec.resources.requests.cpu
           value: 10m
         - name: alertmanager.alertmanagerSpec.resources.requests.memory
