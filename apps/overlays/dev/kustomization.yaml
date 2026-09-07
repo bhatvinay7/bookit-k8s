@@ -150,7 +150,7 @@ images:
   newTag: commit-da6ca6f
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-da6ca6f
+  newTag: commit-301efb2
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-da6ca6f
