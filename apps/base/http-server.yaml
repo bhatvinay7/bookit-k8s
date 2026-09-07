@@ -21,6 +21,8 @@ spec:
             name: backend-secrets
         - secretRef:
             name: frontend-secrets
+        - secretRef:
+            name: bookit-secrets
         - configMapRef:
             name: bookit-config
         image: bookit-http-server:latest

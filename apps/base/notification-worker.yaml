@@ -18,6 +18,8 @@ spec:
       - envFrom:
         - secretRef:
             name: backend-secrets
+        - secretRef:
+            name: bookit-secrets
         - configMapRef:
             name: bookit-config
         env:
