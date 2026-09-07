@@ -22,12 +22,6 @@ spec:
             name: bookit-secrets
         - configMapRef:
             name: bookit-config
-        env:
-        # Use port 587 (STARTTLS) for Gmail SMTP as requested.
-        - name: SMTP_PORT
-          value: "587"
-        - name: SMTP_HOST
-          value: "smtp.gmail.com"
         image: bookit-notification-worker:latest
         name: notification-worker
         resources:
