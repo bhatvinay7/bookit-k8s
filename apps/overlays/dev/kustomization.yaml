@@ -132,13 +132,13 @@ images:
   newTag: commit-c393f5a
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-9e07151
+  newTag: commit-c6818e0
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
   newTag: commit-c393f5a
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-9e07151
+  newTag: commit-c6818e0
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
   newTag: commit-c393f5a
