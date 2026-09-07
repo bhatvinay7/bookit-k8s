@@ -150,7 +150,7 @@ images:
   newTag: commit-dc2c184
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-dc2c184
+  newTag: commit-f2dafcd
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-feacf3a
