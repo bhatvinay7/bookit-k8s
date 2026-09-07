@@ -15,6 +15,21 @@ kube_context="$3"
 command -v kubectl >/dev/null || { echo "kubectl is required" >&2; exit 1; }
 command -v kubeseal >/dev/null || { echo "kubeseal is required" >&2; exit 1; }
 
+# Defaults are resolved before validation so Gmail-only configuration works.
+# Reject literal dotenv quote placeholders before constructing an R2 URI.
+[[ "${CLOUDFLARE_R2_ACCOUNT_ID:-}" =~ ^[[:xdigit:]]{32}$ ]] || {
+  echo "CLOUDFLARE_R2_ACCOUNT_ID must contain 32 hexadecimal characters" >&2; exit 1;
+}
+export CLOUDFLARE_R2_ENDPOINT="https://${CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+export SMTP_HOST="${SMTP_HOST:-smtp.gmail.com}"
+export SMTP_PORT="${SMTP_PORT:-465}"
+export SMTP_USER="${SMTP_USER:-${GMAIL_USER:-}}"
+export SMTP_PASS="${SMTP_PASS:-${GMAIL_APP_PASSWORD:-}}"
+export SMTP_FROM="${SMTP_FROM:-${SMTP_USER}}"
+if [[ -z "${SMTP_SECURE:-}" ]]; then
+  if [[ "$SMTP_PORT" == 465 ]]; then export SMTP_SECURE=true; else export SMTP_SECURE=false; fi
+fi
+
 required=(
   DATABASE_URL REPLICATION_URL MONGODB_URL REDIS_URL RABBITMQ_URL
   MONGODB_DB ELASTICSEARCH_URL GRPC_SERVER_URL GATEWAY_KEEPER_GRPC_URL HTTP_SERVER_URL
@@ -31,8 +46,19 @@ required=(
 )
 
 for name in "${required[@]}"; do
-  [[ -n "${!name:-}" ]] || { echo "required environment variable $name is empty" >&2; exit 1; }
+  value="${!name:-}"
+  [[ -n "$value" && "$value" != '""' && "$value" != "''" ]] || {
+    echo "required environment variable $name is empty or a quoted placeholder" >&2; exit 1;
+  }
 done
+
+case "$SMTP_SECURE" in
+  true|false) ;;
+  *) echo "SMTP_SECURE must be true or false" >&2; exit 1 ;;
+esac
+if [[ "$SMTP_PORT:$SMTP_SECURE" == 465:false || "$SMTP_PORT:$SMTP_SECURE" == 587:true ]]; then
+  echo "SMTP TLS mismatch: use 465/true or 587/false" >&2; exit 1
+fi
 
 validate_url() {
   local name="$1"

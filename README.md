@@ -455,3 +455,64 @@ kubectl apply --dry-run=client -f argocd/prod-apps.yaml
 For cluster readiness, also run `kubectl top nodes`, `kubectl get hpa -A`,
 `kubectl get applications,applicationsets -n argocd`, and a restore test. A
 successful manifest render proves syntax and composition, not runtime safety.
+
+## Repair PDF uploads and notification delivery
+
+The HTTP deployment explicitly reads R2 keys from `backend-secrets` and derives
+its S3 endpoint from the account ID. The notification deployment explicitly
+reads SMTP and Gmail settings from the same secret. Legacy `bookit-secrets`
+values cannot override those keys. An `.env` file on your workstation is not
+loaded into a Kubernetes pod automatically.
+
+From a checkout of the application containing this `bookit-k8s` directory, import
+only delivery settings from the HTTP service's `.env` into the ignored local
+deployment env files:
+
+```bash
+python3 bookit-k8s/scripts/import_delivery_env.py --source apps/http-server/.env
+```
+
+For an already bootstrapped region, merge these values into its existing encrypted
+backend secret using that cluster's Sealed Secrets controller:
+
+```bash
+python3 bookit-k8s/scripts/import_delivery_env.py --source apps/http-server/.env \
+  --seal prod us-east YOUR_KUBE_CONTEXT
+```
+
+This preserves unrelated encrypted keys and does not apply resources or send
+email. It requires `kubeseal` and a working kubeconfig context. If the region has
+no `sealed-backend-secrets.yaml`, first provision its complete secrets with the
+existing `scripts/seal-cluster-secrets.sh` workflow; a delivery-only backend
+secret would omit database and other required credentials. Repeat for each
+cluster, because ciphertext is controller-specific. Commit the changed encrypted
+manifest and deployment YAML to the GitOps repository and deploy new HTTP and
+notification-worker images containing the application fixes. Keep the CI
+GitHub environment's R2/SMTP secrets in sync so the next pipeline does not
+restore stale values.
+
+After Argo CD syncs the secrets and deployments, restart existing pods if an image
+update has not already replaced them (environment variables are read at startup):
+
+```bash
+kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout restart deployment/http-server deployment/notification-worker
+kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout status deployment/http-server --timeout=120s
+kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout status deployment/notification-worker --timeout=120s
+```
+
+Gmail defaults to port 465 with `SMTP_SECURE=true` (implicit TLS). If you use port
+587, set `SMTP_SECURE=false` for required STARTTLS. The worker supports
+`SMTP_USER`/`SMTP_PASS` with `SMTP_FROM`; Gmail credentials are used when both
+SMTP credential fields are absent. Missing credentials are an error outside
+explicit test mode. `Network is unreachable` still requires working pod DNS,
+node routing, and provider/firewall egress to the SMTP host/port; changing secrets
+cannot bypass blocked outbound SMTP. The mail client tries resolved addresses
+with bounded timeouts and reports the destination on failure.
+
+PDF failures no longer save fabricated ticket URLs. PDF and email failures go to
+`notification_failed` for controlled replay after repair. Replayed booking events
+reuse the existing ticket, regenerate legacy `/tickets/default*` PDFs, and retry
+email unless a `booking_email_sent` audit exists. Previously acknowledged failures
+must be recovered from their original booking event; deploying this change does
+not replay them automatically. SMTP delivery is at least once: if sending succeeds
+but saving its audit fails, replay can send a duplicate email.

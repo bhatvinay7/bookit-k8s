@@ -22,12 +22,48 @@ spec:
             name: bookit-secrets
         - configMapRef:
             name: bookit-config
+        # Explicit references prevent legacy bookit-secrets from overriding delivery settings.
         env:
-        # Use port 587 (STARTTLS) for Gmail SMTP as requested.
-        - name: SMTP_PORT
-          value: "587"
         - name: SMTP_HOST
-          value: "smtp.gmail.com"
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_HOST
+        - name: SMTP_PORT
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_PORT
+        - name: SMTP_SECURE
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_SECURE
+        - name: SMTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_USER
+        - name: SMTP_PASS
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_PASS
+        - name: SMTP_FROM
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: SMTP_FROM
+        - name: GMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: GMAIL_USER
+        - name: GMAIL_APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: GMAIL_APP_PASSWORD
         image: bookit-notification-worker:latest
         name: notification-worker
         resources:
