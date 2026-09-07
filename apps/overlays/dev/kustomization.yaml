@@ -132,7 +132,7 @@ images:
   newTag: commit-feacf3a
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-feacf3a
+  newTag: commit-4123510
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
   newTag: commit-feacf3a
