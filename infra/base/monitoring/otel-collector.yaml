@@ -26,6 +26,7 @@ spec:
           ports:
             - containerPort: 4317 # OTLP gRPC receiver
             - containerPort: 4318 # OTLP http receiver
+            - containerPort: 8888 # Collector internal metrics
             - containerPort: 8889 # Prometheus exporter metrics
             - containerPort: 13133 # Collector health endpoint
           resources:
@@ -107,6 +108,9 @@ data:
         endpoint: "0.0.0.0:13133"
 
     service:
+      telemetry:
+        metrics:
+          address: 0.0.0.0:8888
       extensions: [health_check]
       pipelines:
         traces:
@@ -137,6 +141,9 @@ spec:
     - name: otlp-http
       port: 4318
       targetPort: 4318
+    - name: internal-metrics
+      port: 8888
+      targetPort: 8888
     - name: metrics
       port: 8889
       targetPort: 8889
