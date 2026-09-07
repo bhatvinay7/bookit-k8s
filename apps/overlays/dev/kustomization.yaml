@@ -141,7 +141,7 @@ images:
   newTag: commit-dc2c184
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-dc2c184
+  newTag: commit-b6acd5b
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
   newTag: commit-dc2c184
