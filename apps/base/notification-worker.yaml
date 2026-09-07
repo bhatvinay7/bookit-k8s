@@ -20,6 +20,13 @@ spec:
             name: backend-secrets
         - configMapRef:
             name: bookit-config
+        env:
+        # Port 465 = implicit TLS (SMTPS) — works even when cloud providers
+        # block outbound port 587 (STARTTLS). Override the sealed-secret value.
+        - name: SMTP_PORT
+          value: "465"
+        - name: SMTP_HOST
+          value: "smtp.gmail.com"
         image: bookit-notification-worker:latest
         name: notification-worker
         resources:
