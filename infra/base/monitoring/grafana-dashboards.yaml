@@ -13547,7 +13547,7 @@ data:
             "query": "prometheus",
             "queryValue": "",
             "refresh": 1,
-            "regex": "/prometheus-tracing-.*/",
+            "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
           },
