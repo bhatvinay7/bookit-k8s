@@ -15,45 +15,45 @@ spec:
         app: web
     spec:
       containers:
-      - envFrom:
-        - secretRef:
-            name: frontend-secrets
-        - configMapRef:
-            name: bookit-config
-        env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-web
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        image: bookit-web:latest
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        name: web
-        ports:
-        - containerPort: 3000
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - envFrom:
+            - secretRef:
+                name: frontend-secrets
+            - configMapRef:
+                name: bookit-config
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-web
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+          image: bookit-web:latest
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          name: web
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
       serviceAccountName: bookit-app
 ---
 apiVersion: v1
@@ -64,9 +64,9 @@ metadata:
   name: web
 spec:
   ports:
-  - name: http
-    port: 3000
-    targetPort: 3000
+    - name: http
+      port: 3000
+      targetPort: 3000
   selector:
     app: web
   type: ClusterIP

@@ -16,79 +16,79 @@ spec:
         app: http-server
     spec:
       containers:
-      - envFrom:
-        - secretRef:
-            name: backend-secrets
-        - secretRef:
-            name: frontend-secrets
-        - secretRef:
-            name: bookit-secrets
-        - configMapRef:
-            name: bookit-config
-        # Explicit references prevent legacy bookit-secrets from overriding delivery settings.
-        env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-http-server
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        - name: CLOUDFLARE_R2_ACCOUNT_ID
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: CLOUDFLARE_R2_ACCOUNT_ID
-        - name: CLOUDFLARE_R2_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: CLOUDFLARE_R2_ACCESS_KEY_ID
-        - name: CLOUDFLARE_R2_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
-        - name: CLOUDFLARE_R2_BUCKET
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: CLOUDFLARE_R2_BUCKET
-        - name: CLOUDFLARE_R2_PUBLIC_URL
-          valueFrom:
-            secretKeyRef:
-              name: backend-secrets
-              key: CLOUDFLARE_R2_PUBLIC_URL
-        # Derive the S3 endpoint from the account ID; ignore stale legacy endpoints.
-        - name: CLOUDFLARE_R2_ENDPOINT
-          value: ""
-        image: bookit-http-server:latest
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8082
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        name: http-server
-        ports:
-        - containerPort: 8082
-          name: http
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8082
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - envFrom:
+            - secretRef:
+                name: backend-secrets
+            - secretRef:
+                name: frontend-secrets
+            - secretRef:
+                name: bookit-secrets
+            - configMapRef:
+                name: bookit-config
+          # Explicit references prevent legacy bookit-secrets from overriding delivery settings.
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-http-server
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+            - name: CLOUDFLARE_R2_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_ACCOUNT_ID
+            - name: CLOUDFLARE_R2_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_ACCESS_KEY_ID
+            - name: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+            - name: CLOUDFLARE_R2_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_BUCKET
+            - name: CLOUDFLARE_R2_PUBLIC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_PUBLIC_URL
+            # Derive the S3 endpoint from the account ID; ignore stale legacy endpoints.
+            - name: CLOUDFLARE_R2_ENDPOINT
+              value: ""
+          image: bookit-http-server:latest
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          name: http-server
+          ports:
+            - containerPort: 8082
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
       serviceAccountName: bookit-app
 ---
 apiVersion: v1
@@ -99,9 +99,9 @@ metadata:
   name: http-server
 spec:
   ports:
-  - name: http
-    port: 8082
-    targetPort: 8082
+    - name: http
+      port: 8082
+      targetPort: 8082
   selector:
     app: http-server
   type: ClusterIP

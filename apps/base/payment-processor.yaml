@@ -16,29 +16,29 @@ spec:
         app: payment-processor
     spec:
       containers:
-      - envFrom:
-        - secretRef:
-            name: backend-secrets
-        - configMapRef:
-            name: bookit-config
-        env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-payment-processor
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        image: bookit-payment-processor:latest
-        name: payment-processor
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: bookit-config
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-payment-processor
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+          image: bookit-payment-processor:latest
+          name: payment-processor
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
       serviceAccountName: bookit-app

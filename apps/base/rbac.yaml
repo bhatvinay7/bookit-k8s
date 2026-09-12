@@ -9,29 +9,29 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   labels:
-    app: chess
+    app: bookit
   name: bookit-secrets-reader
 rules:
-- apiGroups:
-  - ''
-  resources:
-  - secrets
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
-    app: chess
+    app: bookit
   name: bookit-secrets-reader-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: bookit-secrets-reader
 subjects:
-- kind: ServiceAccount
-  name: bookit-app
+  - kind: ServiceAccount
+    name: bookit-app

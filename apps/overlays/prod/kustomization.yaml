@@ -2,18 +2,51 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- ../../base
+  - ../../base
 
 namespace: bookit
 
 configMapGenerator:
-- name: bookit-config
-  behavior: merge
-  literals:
-  - NODE_ENV=production
+  - name: bookit-config
+    behavior: merge
+    literals:
+      - NODE_ENV=production
 
 labels:
-- pairs:
-    app.kubernetes.io/part-of: bookit
-    bookit.io/environment: prod
-  includeSelectors: false
+  - pairs:
+      app.kubernetes.io/part-of: bookit
+      bookit.io/environment: prod
+    includeSelectors: false
+
+# Replaced with verified GHCR digests by the production promotion workflow.
+images:
+  - name: bookit-cdc-worker
+    newName: ghcr.io/bhatvinay7/bookit-cdc-worker
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-gateway-keeper
+    newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-http-server
+    newName: ghcr.io/bhatvinay7/bookit-http-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-lock-server
+    newName: ghcr.io/bhatvinay7/bookit-lock-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-notification-worker
+    newName: ghcr.io/bhatvinay7/bookit-notification-worker
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-outbox-server
+    newName: ghcr.io/bhatvinay7/bookit-outbox-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-payment-processor
+    newName: ghcr.io/bhatvinay7/bookit-payment-processor
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-search-server
+    newName: ghcr.io/bhatvinay7/bookit-search-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-web
+    newName: ghcr.io/bhatvinay7/bookit-web
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-ws-server
+    newName: ghcr.io/bhatvinay7/bookit-ws-server
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000

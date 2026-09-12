@@ -15,44 +15,44 @@ spec:
         app: ws-server
     spec:
       containers:
-      - envFrom:
-        - secretRef:
-            name: backend-secrets
-        - configMapRef:
-            name: bookit-config
-        env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-ws-server
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        image: bookit-ws-server:latest
-        livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 20
-          tcpSocket:
-            port: 8081
-        name: ws-server
-        ports:
-        - containerPort: 8081
-          name: http
-        readinessProbe:
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          tcpSocket:
-            port: 8081
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: bookit-config
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-ws-server
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+          image: bookit-ws-server:latest
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            tcpSocket:
+              port: 8081
+          name: ws-server
+          ports:
+            - containerPort: 8081
+              name: http
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            tcpSocket:
+              port: 8081
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
       serviceAccountName: bookit-app
 ---
 apiVersion: v1
@@ -63,9 +63,9 @@ metadata:
   name: ws-server
 spec:
   ports:
-  - name: http
-    port: 8081
-    targetPort: 8081
+    - name: http
+      port: 8081
+      targetPort: 8081
   selector:
     app: ws-server
   type: ClusterIP

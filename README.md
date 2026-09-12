@@ -6,10 +6,10 @@ this repository.
 
 ## Promotion model
 
-| Application branch | GitHub environment | GitOps branch | Overlay | Target |
-|---|---|---|---|---|
-| `dev` | `development` | `dev` | `apps/overlays/dev` | development clusters |
-| `main` | `production` | `main` | `apps/overlays/prod` | production clusters |
+| Application branch | GitHub environment | GitOps branch | Overlay              | Target               |
+| ------------------ | ------------------ | ------------- | -------------------- | -------------------- |
+| `dev`              | `development`      | `dev`         | `apps/overlays/dev`  | development clusters |
+| `main`             | `production`       | `main`        | `apps/overlays/prod` | production clusters  |
 
 Never merge an automated image update from `dev` directly into production.
 Promote application code through a reviewed `dev -> main` pull request. The
@@ -38,7 +38,7 @@ apps/base/                              shared stateless workloads
 apps/overlays/dev/                     development configuration
 apps/regions/dev/us-east/              dev regional app and ciphertext
 apps/regions/prod/us-east/             prod US regional app and ciphertext
-apps/regions/prod/eu-west/             prod EU regional app and ciphertext
+apps/regions/prod/eu-west/             legacy inactive overlay (not deployed)
 infra/base/                             shared cluster services
 infra/overlays/dev/                    development infrastructure
 infra/overlays/prod/                   production infrastructure
@@ -158,16 +158,16 @@ number in source control: payload size, cardinality, sampling, node disk speed,
 database latency and retention all change capacity. The checked-in values are a
 safe baseline to load-test, not a throughput guarantee.
 
-| Layer | Horizontal unit | Baseline protection | Primary scale limit and control |
-|---|---|---|---|
-| Stateless API/gateway/search | Pod | CPU requests/limits and HPAs | Database pools and downstream latency; scale replicas only with matching connection budgets |
-| WebSocket | Pod | Regional Redis coordination | Open connections, file descriptors and reconnect storms; use connection-aware load tests and graceful draining |
-| Workers | Pod/consumer | RabbitMQ durability and bounded concurrency | Queue lag and downstream write rate; scale on queue depth, not CPU alone |
-| Fluent Bit | One pod per node | 50 MiB memory buffer plus node-local filesystem backlog | Per-node log bytes/sec and disk; enforce log levels, rotation and payload limits |
-| OTEL Collector | Two replicas | 1 GiB limit each, 768 MiB limiter, 2,048-item batches, 10,000-item trace queues | Signal bytes/sec and exporter latency; shard or autoscale collectors and watch refused/dropped telemetry |
-| Prometheus | One stack per cluster | 15-day retention | Active series × scrape frequency × retention; control labels/cardinality, add persistent storage, then shard or use remote-write |
-| Loki | Single persistent baseline | 50 GiB PVC | Compressed log bytes/day × retention; move to object storage and distributed Loki before sustained high volume |
-| Tempo | Single ephemeral baseline | Batched collector exports | Spans/sec × average span size × retention; add sampling and object-backed distributed Tempo |
+| Layer                        | Horizontal unit            | Baseline protection                                                             | Primary scale limit and control                                                                                                  |
+| ---------------------------- | -------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Stateless API/gateway/search | Pod                        | CPU requests/limits and HPAs                                                    | Database pools and downstream latency; scale replicas only with matching connection budgets                                      |
+| WebSocket                    | Pod                        | Regional Redis coordination                                                     | Open connections, file descriptors and reconnect storms; use connection-aware load tests and graceful draining                   |
+| Workers                      | Pod/consumer               | RabbitMQ durability and bounded concurrency                                     | Queue lag and downstream write rate; scale on queue depth, not CPU alone                                                         |
+| Fluent Bit                   | One pod per node           | 50 MiB memory buffer plus node-local filesystem backlog                         | Per-node log bytes/sec and disk; enforce log levels, rotation and payload limits                                                 |
+| OTEL Collector               | Two replicas               | 1 GiB limit each, 768 MiB limiter, 2,048-item batches, 10,000-item trace queues | Signal bytes/sec and exporter latency; shard or autoscale collectors and watch refused/dropped telemetry                         |
+| Prometheus                   | One stack per cluster      | 15-day retention                                                                | Active series × scrape frequency × retention; control labels/cardinality, add persistent storage, then shard or use remote-write |
+| Loki                         | Single persistent baseline | 50 GiB PVC                                                                      | Compressed log bytes/day × retention; move to object storage and distributed Loki before sustained high volume                   |
+| Tempo                        | Single ephemeral baseline  | Batched collector exports                                                       | Spans/sec × average span size × retention; add sampling and object-backed distributed Tempo                                      |
 
 Capacity planning starts with measurements. Load-test expected peak traffic plus
 failure bursts, then record: request and error rate, p95/p99 latency, active
@@ -223,39 +223,25 @@ Required repository or environment secrets:
 - `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SOCKET_URL` and the remaining frontend
   build-time secrets used by `.github/workflows/ci-cd.yaml`.
 
-Required GitHub environment variables:
-
-| Environment | `DEPLOY_REGIONS` | `KUBE_CONTEXTS` |
-|---|---|---|
-| development | `us-east` | `bookit-dev-us-east` |
-| production | `us-east,eu-west` | `bookit-prod-us-east,bookit-prod-eu-west` |
-
-The two lists are positional and must have equal lengths. Context names must
-exactly match `kubectl config get-contexts -o name` in that environment's
-`KUBECONFIG`.
-
-Do not use one kubeconfig across development and production. Use service
-accounts with the minimum bootstrap permissions, short-lived credentials where
-the provider supports them, and GitHub environment approval for production.
+Deployment targets one cluster using the current context in the selected
+GitHub environment's `KUBECONFIG` secret. CI seals secrets into the existing
+`apps/regions/<dev|prod>/us-east` overlay. `us-east` is the retained overlay
+identifier; no additional region, context-list or secondary-cluster configuration
+is required. `DEPLOY_REGIONS`, `KUBE_CONTEXTS`, `PRIMARY_REGION`,
+`ENABLE_MULTI_REGION` and `KUBE_CONFIG_SECONDARY` are not used.
 
 ## Sealed Secrets lifecycle
 
-Each cluster runs its own Sealed Secrets controller and therefore owns a
-different encryption key. The CI workflow calls
-`scripts/seal-cluster-secrets.sh` once per kubeconfig context. It writes only
-encrypted `SealedSecret` resources under that cluster's regional overlay.
+The cluster's Sealed Secrets controller owns the encryption key. CI calls
+`scripts/seal-cluster-secrets.sh` once with the current kubeconfig context and
+writes encrypted resources under `apps/regions/<dev|prod>/us-east/secrets`.
 
-Bootstrap order for a new cluster:
+Bootstrap order:
 
-1. Add the cluster context to the correct environment kubeconfig.
-2. Install Argo CD and the Sealed Secrets controller.
-3. Wait for `sealed-secrets-controller` to become Ready.
-4. Add a regional overlay and an ApplicationSet generator element.
-5. Add the matching region and context to the GitHub environment variables.
-6. Run the application CI workflow to generate and commit ciphertext.
-7. Confirm `backend-secrets`, `frontend-secrets`, `bookit-secrets`, and
-   `ghcr-secret` exist in namespace `bookit`.
-8. Sync the regional Argo CD application.
+1. Set the GitHub environment's `KUBECONFIG` secret with its current context.
+2. Run bootstrap to install controllers, including the monitoring CRDs/operator.
+3. Run CI to generate and commit ciphertext for the active `us-east` overlay.
+4. Confirm application Secrets exist in namespace `bookit`, then sync Argo CD.
 
 Ciphertext is safe to store in Git, but controller private keys are not. Back up
 each controller key to a restricted secret manager. Secret rotation means
@@ -264,20 +250,11 @@ plaintext Kubernetes Secret, `.env`, or kubeconfig.
 
 ## Argo CD and cluster registration
 
-The current dev cluster uses the in-cluster API URL. Production defines an
-in-cluster US endpoint and an example EU endpoint in `argocd/prod-apps.yaml`.
-Replace example URLs with real Argo CD cluster registrations before bootstrap:
-
-```bash
-argocd cluster add bookit-prod-us-east --name prod-cluster-us-east
-argocd cluster add bookit-prod-eu-west --name prod-cluster-eu-west
-argocd cluster list
-```
-
-The names, URLs, ApplicationSet elements, and kubeconfig contexts are separate
-identifiers; verify all four. Prefer one Argo CD control plane per environment.
-If a single production Argo CD manages both regions, make the control plane HA
-and ensure a regional outage does not prevent recovery of the surviving region.
+Both development and production ApplicationSets use only
+`https://kubernetes.default.svc`. Bootstrap selects the matching environment and
+registers the current cluster for the stateful-services generator. No remote
+cluster registration is required. Existing `*-cluster-us-east` application
+names are retained. The eu-west overlay is inactive and not a deployment target.
 
 Automated prune and self-heal are enabled. Production changes should still be
 protected by the GitHub environment review and branch protection on `main`.
@@ -348,6 +325,7 @@ policy if available.
 `charts/stateful-services` is a dynamic Helm chart that handles database deployments across single or multi-region setups. It is deployed automatically via the `argocd/stateful-applicationset.yaml` ArgoCD ApplicationSet.
 
 This architecture offers granular cloud provider controls:
+
 - **Redis:** Deploys locally as a custom highly-available StatefulSet when a managed service is disabled.
 - **RabbitMQ:** Deploys through the official RabbitMQ Cluster Operator (`v2.22.3`). The Messaging Topology Operator (`v1.20.2`) declaratively creates the passwordless `bookit` user and permissions. Client connections use mTLS with SASL `EXTERNAL`; password-based AMQP listeners are disabled.
 - **PostgreSQL & MongoDB:** Evaluated dynamically based on your environment's cloud preference. If `USE_CLOUD_PROVIDER` is true, the chart provisions an `ExternalName` Service proxying traffic to your SaaS databases. If false, it falls back to custom in-cluster StatefulSet deployments.
@@ -362,8 +340,8 @@ Before using custom deployments, ensure you seal a `custom-db-ha-secrets` Secret
   `postgres-exporter-dsn`, `pgpool-admin-password`;
 - `redis-password`.
 
-**Multi-Region Behavior:**
-If multi-region is enabled, ArgoCD automatically labels and targets both primary and secondary clusters, creating independent database instances in each region. If disabled, it targets only the primary cluster. Wait for `deploy-stateful-services` to apply successfully before routing traffic.
+**Single-cluster deployment:**
+Bootstrap labels the current cluster for stateful-services. The deployment does not register a secondary cluster or require a multi-region setting.
 
 ## Global load balancing and failover
 
@@ -445,7 +423,6 @@ Run before every GitOps PR:
 ```bash
 kubectl kustomize apps/regions/dev/us-east >/dev/null
 kubectl kustomize apps/regions/prod/us-east >/dev/null
-kubectl kustomize apps/regions/prod/eu-west >/dev/null
 kubectl kustomize infra/overlays/dev >/dev/null
 kubectl kustomize infra/overlays/prod >/dev/null
 kubectl apply --dry-run=client -f argocd/dev-apps.yaml

@@ -16,50 +16,50 @@ spec:
         app: outbox-server
     spec:
       containers:
-      - env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-outbox-server
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: DATABASE_URL
-              name: backend-secrets
-        - name: RABBITMQ_URL
-          valueFrom:
-            secretKeyRef:
-              key: RABBITMQ_URL
-              name: backend-secrets
-        envFrom:
-        - configMapRef:
-            name: bookit-config
-        image: bookit-outbox-server:latest
-        name: outbox-server
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-outbox-server
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: backend-secrets
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  key: RABBITMQ_URL
+                  name: backend-secrets
+          envFrom:
+            - configMapRef:
+                name: bookit-config
+          image: bookit-outbox-server:latest
+          name: outbox-server
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
       initContainers:
-      - args:
-        - --migrate-only
-        command:
-        - outbox-server
-        env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              key: DATABASE_URL
-              name: backend-secrets
-        image: bookit-outbox-server:latest
-        name: migrate-payment-outbox
+        - args:
+            - --migrate-only
+          command:
+            - outbox-server
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: DATABASE_URL
+                  name: backend-secrets
+          image: bookit-outbox-server:latest
+          name: migrate-payment-outbox
       serviceAccountName: bookit-app

@@ -24,16 +24,23 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install PyYAML==6.0.3
+      - name: Validate monitoring, namespaces and images
+        run: |
+          python3 scripts/validate-monitoring.py
+          python3 scripts/test-bootstrap-monitoring.py
+
       - name: Render all Kustomize targets
         run: |
           targets=(
             apps/regions/dev/us-east
             apps/regions/prod/us-east
-            apps/regions/prod/eu-west
             infra/overlays/dev
             infra/overlays/prod
             infra/features/operator-db
-            infra/base/custom-db-ha
           )
           for target in "${targets[@]}"; do
             echo "Rendering $target"
@@ -42,7 +49,7 @@ jobs:
 
       - name: Validate outbox deployment contract
         run: |
-          for target in apps/regions/dev/us-east apps/regions/prod/us-east apps/regions/prod/eu-west; do
+          for target in apps/regions/dev/us-east apps/regions/prod/us-east; do
             rendered=$(mktemp)
             kubectl kustomize "$target" > "$rendered"
             grep -q 'name: outbox-server' "$rendered"

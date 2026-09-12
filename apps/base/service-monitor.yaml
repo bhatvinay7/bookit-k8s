@@ -4,18 +4,18 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
-    release: prometheus
+    release: kube-prometheus-stack
   name: bookit-apps-monitor
   namespace: bookit
 spec:
   endpoints:
-  - interval: 15s
-    path: /metrics
-    port: http
+    - interval: 15s
+      path: /metrics
+      port: http
   namespaceSelector:
     matchNames:
-    - bookit
+      - bookit
   selector:
     matchExpressions:
-    - key: app
-      operator: Exists
+      - key: app
+        operator: Exists

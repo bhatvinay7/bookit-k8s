@@ -16,31 +16,31 @@ spec:
         app: lock-server
     spec:
       containers:
-      - env:
-        - name: OTEL_SERVICE_NAME
-          value: bookit-lock-server
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
-        - name: K8S_NAMESPACE
-          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
-        - name: POD_NAME
-          valueFrom: { fieldRef: { fieldPath: metadata.name } }
-        - name: LOCK_WORKER_CONCURRENCY
-          value: '10'
-        envFrom:
-        - secretRef:
-            name: backend-secrets
-        - configMapRef:
-            name: bookit-config
-        image: bookit-lock-server:latest
-        imagePullPolicy: Always
-        name: lock-server
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        - env:
+            - name: OTEL_SERVICE_NAME
+              value: bookit-lock-server
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+            - name: LOCK_WORKER_CONCURRENCY
+              value: "10"
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: bookit-config
+          image: bookit-lock-server:latest
+          imagePullPolicy: Always
+          name: lock-server
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi
       imagePullSecrets:
-      - name: ghcr-secret
+        - name: ghcr-secret
