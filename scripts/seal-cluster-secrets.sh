@@ -30,6 +30,9 @@ if [[ -z "${SMTP_SECURE:-}" ]]; then
   if [[ "$SMTP_PORT" == 465 ]]; then export SMTP_SECURE=true; else export SMTP_SECURE=false; fi
 fi
 
+# GitHub Actions supplies the repository owner even without a username secret.
+export GHCR_USERNAME="${GHCR_USERNAME:-${GITHUB_REPOSITORY_OWNER:-}}"
+
 required=(
   DATABASE_URL REPLICATION_URL MONGODB_URL REDIS_URL RABBITMQ_URL
   MONGODB_DB ELASTICSEARCH_URL GRPC_SERVER_URL GATEWAY_KEEPER_GRPC_URL HTTP_SERVER_URL
