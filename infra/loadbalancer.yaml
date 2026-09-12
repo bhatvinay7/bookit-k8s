@@ -2,8 +2,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: l4-loadbalancer
+  namespace: ingress-nginx
+  annotations:
+    # DigitalOcean: provision a Layer 4 TCP load balancer (pass-through, no SSL termination at LB level)
+    service.beta.kubernetes.io/do-loadbalancer-protocol: "tcp"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: "tcp"
+    service.beta.kubernetes.io/do-loadbalancer-healthcheck-port: "80"
+    argocd.argoproj.io/sync-wave: "-5"
 spec:
   type: LoadBalancer
+  externalTrafficPolicy: Local
   ports:
     - name: http
       port: 80
@@ -14,5 +22,5 @@ spec:
       targetPort: 443
       protocol: TCP
   selector:
-    # Update this selector to match your target pods (e.g., ingress-nginx)
     app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/component: controller
