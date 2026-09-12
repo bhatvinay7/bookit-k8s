@@ -20,6 +20,15 @@ spec:
             name: frontend-secrets
         - configMapRef:
             name: bookit-config
+        env:
+        - name: OTEL_SERVICE_NAME
+          value: bookit-web
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+        - name: K8S_NAMESPACE
+          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+        - name: POD_NAME
+          valueFrom: { fieldRef: { fieldPath: metadata.name } }
         image: bookit-web:latest
         livenessProbe:
           httpGet:

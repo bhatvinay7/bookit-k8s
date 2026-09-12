@@ -73,6 +73,15 @@ data:
         Host         otel-collector.monitoring.svc.cluster.local
         Port         4318
         Logs_uri     /v1/logs
+        Logs_Body_Key $log
+        Logs_Body_Key_Attributes True
+        Logs_Severity_Text_Message_Key severity
+        Add_Label service.name $kubernetes['container_name']
+        Add_Label namespace $kubernetes['namespace_name']
+        Add_Label k8s.namespace.name $kubernetes['namespace_name']
+        Add_Label k8s.pod.name $kubernetes['pod_name']
+        Add_Label k8s.container.name $kubernetes['container_name']
+        Log_Response_Payload False
         tls          Off
         Retry_Limit  False
 

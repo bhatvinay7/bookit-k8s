@@ -48,6 +48,8 @@ spec:
                 cpu: 50m
                 memory: 100Mi
         grafana:
+          adminUser: admin
+          adminPassword: admin
           resources:
             requests:
               cpu: 10m
@@ -55,7 +57,6 @@ spec:
             limits:
               cpu: 100m
               memory: 200Mi
-          adminPassword: admin
           ingress:
             enabled: true
             ingressClassName: nginx
@@ -73,17 +74,47 @@ spec:
               enabled: true
               label: grafana_dashboard
               labelValue: "1"
+              searchNamespace: ALL
           additionalDataSources:
             - name: Tempo
               type: tempo
               uid: tempo
               url: http://tempo.monitoring.svc.cluster.local:3200
               access: proxy
+              jsonData:
+                tracesToLogsV2:
+                  datasourceUid: loki
+                  filterByTraceID: true
+                  filterBySpanID: true
+                  spanStartTimeShift: -1m
+                  spanEndTimeShift: 1m
+                tracesToMetrics:
+                  datasourceUid: prometheus
+                  tags:
+                    - key: service.name
+                      value: service_name
+                  queries:
+                    - name: Request rate
+                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags}[5m]))
+                    - name: Error rate
+                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags,status_code="STATUS_CODE_ERROR"}[5m]))
+                    - name: p99 latency
+                      query: histogram_quantile(0.99,sum(rate(bookit_traces_spanmetrics_latency_bucket{$$__tags}[5m]))by(le))
+                serviceMap:
+                  datasourceUid: prometheus
+                nodeGraph:
+                  enabled: true
             - name: Loki
               type: loki
               uid: loki
               url: http://loki-stack.monitoring.svc.cluster.local:3100
               access: proxy
+              jsonData:
+                derivedFields:
+                  - name: TraceID
+                    matcherRegex: '"trace_id":"([0-9a-f]+)"'
+                    datasourceUid: tempo
+                    url: $${__value.raw}
         kube-state-metrics:
           resources:
             requests:

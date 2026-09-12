@@ -24,6 +24,14 @@ spec:
             name: bookit-config
         # Explicit references prevent legacy bookit-secrets from overriding delivery settings.
         env:
+        - name: OTEL_SERVICE_NAME
+          value: bookit-notification-worker
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
+        - name: K8S_NAMESPACE
+          valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+        - name: POD_NAME
+          valueFrom: { fieldRef: { fieldPath: metadata.name } }
         - name: SMTP_HOST
           valueFrom:
             secretKeyRef:
