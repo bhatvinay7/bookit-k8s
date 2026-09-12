@@ -196,7 +196,8 @@ printf '%s\n' \
   '- sealed-frontend-secrets.yaml' \
   '- sealed-platform-secrets.yaml' \
   '- sealed-custom-db-ha-secrets.yaml' \
-  '- sealed-ghcr-secret.yaml' > "${out_dir}/kustomization.yaml"
+  '- sealed-ghcr-secret.yaml' \
+  '- sealed-alertmanager-secret.yaml' > "${out_dir}/kustomization.yaml"
 
 echo "sealed ${environment}/${region} secrets for context ${kube_context}"
 
