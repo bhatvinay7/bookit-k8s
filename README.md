@@ -48,9 +48,9 @@ scripts/seal-cluster-secrets.sh        cluster-specific secret sealing
 ```
 
 The environment overlay owns image tags and non-secret environment
-configuration. CI derives `BOOKIT_ENVIRONMENT` and `BOOKIT_REGION` from the
-selected GitHub environment and regional deployment matrix, then seals both
-values into each cluster's runtime Secrets. A regional overlay contains only
+configuration. Bootstrap derives `BOOKIT_ENVIRONMENT` from the selected GitHub
+environment and sets `BOOKIT_REGION` to `us-east`, then seals both values into
+the cluster's runtime Secrets. A regional overlay contains only
 the region label and SealedSecret ciphertext encrypted for that cluster.
 
 ## Runtime and observability architecture
@@ -224,7 +224,7 @@ Required repository or environment secrets:
   build-time secrets used by `.github/workflows/ci-cd.yaml`.
 
 Deployment targets one cluster using the current context in the selected
-GitHub environment's `KUBECONFIG` secret. CI seals secrets into the existing
+GitHub environment's `KUBECONFIG` secret. Bootstrap seals secrets into the existing
 `apps/regions/<dev|prod>/us-east` overlay. `us-east` is the retained overlay
 identifier; no additional region, context-list or secondary-cluster configuration
 is required. `DEPLOY_REGIONS`, `KUBE_CONTEXTS`, `PRIMARY_REGION`,
@@ -232,20 +232,28 @@ is required. `DEPLOY_REGIONS`, `KUBE_CONTEXTS`, `PRIMARY_REGION`,
 
 ## Sealed Secrets lifecycle
 
-The cluster's Sealed Secrets controller owns the encryption key. CI calls
+The cluster's Sealed Secrets controller owns the encryption key. The application
+repository's `.github/workflows/bootstrap-argocd.yaml` calls
 `scripts/seal-cluster-secrets.sh` once with the current kubeconfig context and
 writes encrypted resources under `apps/regions/<dev|prod>/us-east/secrets`.
 
 Bootstrap order:
 
 1. Set the GitHub environment's `KUBECONFIG` secret with its current context.
-2. Run bootstrap to install controllers, including the monitoring CRDs/operator.
-3. Run CI to generate and commit ciphertext for the active `us-east` overlay.
-4. Confirm application Secrets exist in namespace `bookit`, then sync Argo CD.
+2. Run bootstrap to install controllers, generate and commit ciphertext for the
+   active `us-east` overlay, then register the Argo CD application sets.
+3. Confirm Argo CD has created application Secrets in namespace `bookit` and the
+   Alertmanager Secret in `monitoring`.
+4. Run CI to build images and update their GitOps tags. CI does not access the
+   cluster or regenerate runtime secrets.
+
+Bootstrap uses `development` secrets and GitOps branch `deployment1` when run
+from `deployment1`; the `main` branch uses `production` secrets and GitOps branch
+`main`. `GITOPS_TOKEN` needs write access to `bookit-k8s` to commit ciphertext.
 
 Ciphertext is safe to store in Git, but controller private keys are not. Back up
 each controller key to a restricted secret manager. Secret rotation means
-updating the GitHub environment secret and rerunning CI. Never commit a
+updating the GitHub environment secret and rerunning bootstrap. Never commit a
 plaintext Kubernetes Secret, `.env`, or kubeconfig.
 
 ## Argo CD and cluster registration

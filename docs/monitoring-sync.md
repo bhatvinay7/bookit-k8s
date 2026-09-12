@@ -48,7 +48,9 @@ valid when CI only builds changed services.
 Bookit deploys to one cluster using `https://kubernetes.default.svc`. The
 `us-east` directory and application names are retained as existing identifiers;
 no eu-west cluster, secondary kubeconfig or region/context lists are required.
-The CI runner uses the current context in the environment's `KUBECONFIG`.
+Bootstrap uses the current context in the environment's `KUBECONFIG` and commits
+sealed runtime secrets before registering application sets. CI builds images and
+updates GitOps image tags; it does not seal secrets or connect to the cluster.
 
 References: [Argo sync options](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-options/),
 [child application health](https://argo-cd.readthedocs.io/en/stable/operator-manual/health/#argocd-app).
