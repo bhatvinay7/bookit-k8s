@@ -230,6 +230,24 @@ identifier; no additional region, context-list or secondary-cluster configuratio
 is required. `DEPLOY_REGIONS`, `KUBE_CONTEXTS`, `PRIMARY_REGION`,
 `ENABLE_MULTI_REGION` and `KUBE_CONFIG_SECONDARY` are not used.
 
+## Ingress readiness
+
+The application repository's bootstrap workflow installs the cert-manager version
+declared in `argocd/argocd-cert-manager.yaml`, then calls
+`bash scripts/install-ingress-nginx.sh`. The script waits for the cert-manager,
+cainjector, and webhook deployments and retries a server-side Certificate dry run
+before installing NGINX. It also waits for NGINX and its admission jobs to finish.
+Each readiness phase defaults to five minutes; set `READY_TIMEOUT_SECONDS=600`
+for slower clusters. The dry run does not issue a certificate or depend on NGINX.
+
+For an existing cluster with cert-manager installed, rerun that script using the
+intended kubeconfig context. DNS for `argocd.bookit4u.shop` must point to a public
+LoadBalancer Service selecting the NGINX controller. This repository also defines
+`ingress-nginx/l4-loadbalancer`; check which Service address DNS uses if both it
+and `ingress-nginx-controller` exist. The Argo CD ingress forwards HTTPS to
+`argocd-server:https`. A Dex log saying `dex is not configured` refers to SSO,
+not controller readiness.
+
 ## Sealed Secrets lifecycle
 
 The cluster's Sealed Secrets controller owns the encryption key. The application
