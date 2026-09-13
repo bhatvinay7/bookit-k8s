@@ -141,31 +141,31 @@ patches:
 images:
 - name: bookit-cdc-worker
   newName: ghcr.io/bhatvinay7/bookit-cdc-worker
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-e32c9e1
+  newTag: commit-1a708d1
