@@ -88,12 +88,39 @@ def main():
     )
     for env, apps_path, infra_path in targets:
         apps, infra = render(apps_path), render(infra_path)
+        for d in apps + infra:
+            if d["kind"] in CLUSTER_SCOPED:
+                check(
+                    not d["metadata"].get("namespace"),
+                    f"{d['kind']}/{d['metadata']['name']} must not have a namespace",
+                )
+        services = {
+            (namespace(d, app_namespace), d["metadata"]["name"]): d
+            for d in apps if d["kind"] == "Service"
+        }
         for d in apps:
             if d["kind"] not in CLUSTER_SCOPED:
                 check(
                     namespace(d, app_namespace) == app_namespace,
                     f"{apps_path}: {d['kind']}/{d['metadata']['name']} is in the wrong namespace",
                 )
+            if d["kind"] == "Ingress":
+                for rule in d["spec"].get("rules", []):
+                    for path in rule.get("http", {}).get("paths", []):
+                        backend = path["backend"].get("service")
+                        if not backend:
+                            continue
+                        key = (namespace(d, app_namespace), backend["name"])
+                        check(key in services, f"Ingress backend Service {key} is missing")
+                        port = backend["port"]
+                        check(
+                            any(
+                                ("name" in port and p.get("name") == port["name"])
+                                or ("number" in port and p["port"] == port["number"])
+                                for p in services[key]["spec"]["ports"]
+                            ),
+                            f"Ingress backend Service {key} has no matching port {port}",
+                        )
         for d in apps:
             if d["kind"] == "Deployment":
                 for c in d["spec"]["template"]["spec"]["containers"]:

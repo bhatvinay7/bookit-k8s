@@ -6,6 +6,22 @@ resources:
 
 namespace: bookit
 
+# Run after the namespace transformer: ClusterIssuer is a cluster-scoped resource,
+# but Kustomize otherwise treats this custom kind as namespaced.
+transformers:
+  - |-
+    apiVersion: builtin
+    kind: PatchTransformer
+    metadata:
+      name: cluster-issuer-scope
+    target:
+      group: cert-manager.io
+      version: v1
+      kind: ClusterIssuer
+    patch: |-
+      - op: remove
+        path: /metadata/namespace
+
 configMapGenerator:
   - name: bookit-config
     behavior: merge
