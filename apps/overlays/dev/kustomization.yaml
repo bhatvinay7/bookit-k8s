@@ -26,7 +26,6 @@ configMapGenerator:
 - behavior: merge
   literals:
   - NODE_ENV=development
-  - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://dev.bookit4u.shop,https://api.dev.bookit4u.shop,https://ws.dev.bookit4u.shop
   name: bookit-config
 
 labels:
@@ -59,7 +58,7 @@ patches:
       value: ws.dev.bookit4u.shop
     - op: replace
       path: /spec/tls/0/hosts/2
-      value: dev.bookit4u.shop
+      value: web.dev.bookit4u.shop
     - op: replace
       path: /spec/rules/0/host
       value: api.dev.bookit4u.shop
@@ -68,7 +67,7 @@ patches:
       value: ws.dev.bookit4u.shop
     - op: replace
       path: /spec/rules/2/host
-      value: dev.bookit4u.shop
+      value: web.dev.bookit4u.shop
     - op: remove
       path: /spec/rules/3
     - op: remove
