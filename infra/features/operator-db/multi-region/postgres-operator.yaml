@@ -2,7 +2,7 @@ apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
   name: bookit-postgres
-  namespace: bookit
+  namespace: default
 spec:
   image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-ha:centos8-15.4-0
   postgresVersion: 15

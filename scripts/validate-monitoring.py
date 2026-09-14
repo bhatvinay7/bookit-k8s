@@ -82,7 +82,7 @@ def check_observability(apps, infra, values):
           "Loki datasource must resolve to the Loki Helm Service")
     link = tempo["jsonData"]["tracesToLogsV2"]
     check(link["datasourceUid"] == loki["uid"] and link["customQuery"]
-          and '{namespace="bookit"}' in link["query"]
+          and '{namespace="default"}' in link["query"]
           and "$${__span.traceId}" in link["query"],
           "Trace-to-log link must use the ingested labels and an escaped trace ID variable")
     derived = loki["jsonData"]["derivedFields"][0]

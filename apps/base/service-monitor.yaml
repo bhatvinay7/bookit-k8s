@@ -6,7 +6,7 @@ metadata:
   labels:
     release: kube-prometheus-stack
   name: bookit-apps-monitor
-  namespace: bookit
+  namespace: default
 spec:
   endpoints:
     - interval: 15s
@@ -14,7 +14,7 @@ spec:
       port: http
   namespaceSelector:
     matchNames:
-      - bookit
+      - default
   selector:
     matchExpressions:
       - key: app

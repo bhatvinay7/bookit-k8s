@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-proxy
-  namespace: bookit
+  namespace: default
 spec:
   type: ExternalName
   externalName: {{ if and .Values.global.multiRegion.enabled (eq .Values.global.currentRegion .Values.global.secondaryRegion) }}replica.redis.cloud.bookit.com{{ else }}primary.redis.cloud.bookit.com{{ end }}

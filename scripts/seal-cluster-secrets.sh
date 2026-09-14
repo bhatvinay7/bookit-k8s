@@ -105,7 +105,7 @@ seal() {
     kubeseal "${kubeseal_args[@]}" > "${out_dir}/${output}"
 }
 
-seal bookit backend-secrets sealed-backend-secrets.yaml \
+seal default backend-secrets sealed-backend-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=DATABASE_URL="$DATABASE_URL" \
@@ -145,7 +145,7 @@ seal bookit backend-secrets sealed-backend-secrets.yaml \
   --from-literal=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
   --from-literal=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
-seal bookit frontend-secrets sealed-frontend-secrets.yaml \
+seal default frontend-secrets sealed-frontend-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
@@ -157,7 +157,7 @@ seal bookit frontend-secrets sealed-frontend-secrets.yaml \
   --from-literal=NEXT_PUBLIC_RAZORPAY_KEY_ID="$NEXT_PUBLIC_RAZORPAY_KEY_ID" \
   --from-literal=NEXT_PUBLIC_USE_REMOTE_STOCKFISH="$NEXT_PUBLIC_USE_REMOTE_STOCKFISH"
 
-seal bookit bookit-secrets sealed-platform-secrets.yaml \
+seal default bookit-secrets sealed-platform-secrets.yaml \
   --from-literal=BOOKIT_ENVIRONMENT="$environment" \
   --from-literal=BOOKIT_REGION="$region" \
   --from-literal=CLOUDFLARE_R2_ACCOUNT_ID="$CLOUDFLARE_R2_ACCOUNT_ID" \
@@ -172,7 +172,7 @@ seal bookit bookit-secrets sealed-platform-secrets.yaml \
   --from-literal=AWS_DEFAULT_REGION="auto"
 
 # Keep legacy RabbitMQ values until rabbitmq-ha-v6 is confirmed pruned.
-seal bookit custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
+seal default custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
   --from-literal=mongodb-root-password="${CUSTOM_DB_MONGODB_ROOT_PASSWORD:-}" \
   --from-literal=mongodb-replica-set-key="${CUSTOM_DB_MONGODB_REPLICA_SET_KEY:-}" \
   --from-literal=mongodb-exporter-uri="${CUSTOM_DB_MONGODB_EXPORTER_URI:-}" \
@@ -186,7 +186,7 @@ seal bookit custom-db-ha-secrets sealed-custom-db-ha-secrets.yaml \
   --from-literal=rabbitmq-password="${CUSTOM_DB_RABBITMQ_PASSWORD:-}" \
   --from-literal=redis-password="${CUSTOM_DB_REDIS_PASSWORD:-}"
 
-kubectl --context "$kube_context" -n bookit create secret docker-registry ghcr-secret \
+kubectl --context "$kube_context" -n default create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io --docker-username="$GHCR_USERNAME" \
   --docker-password="$GHCR_TOKEN" --dry-run=client -o yaml |
   kubeseal "${kubeseal_args[@]}" > "${out_dir}/sealed-ghcr-secret.yaml"

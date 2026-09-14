@@ -25,7 +25,7 @@ reentrant and cannot reliably retrieve context.
 
 Tempo stores traces, Loki stores logs, and Prometheus stores metrics. Fluent Bit
 ships container logs directly to Loki with namespace/container/pod labels.
-Grafana's trace-to-log link searches the trace ID across the `bookit` namespace,
+Grafana's trace-to-log link searches the trace ID across the `default` namespace,
 so errors in child spans are included. A trace with no error logs will only show
 its normal logs. The reverse Loki link resolves the JSON trace ID to Tempo.
 

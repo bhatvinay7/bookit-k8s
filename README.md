@@ -55,7 +55,7 @@ the region label and SealedSecret ciphertext encrypted for that cluster.
 
 ## Runtime and observability architecture
 
-Bookit uses regional, stateless application replicas in namespace `bookit` and
+Bookit uses regional, stateless application replicas in namespace `default` and
 cluster-local observability services in namespace `monitoring`. Argo CD applies
 the desired state; it is not in the request or telemetry data path.
 
@@ -262,10 +262,24 @@ Bootstrap order:
 1. Set the GitHub environment's `KUBECONFIG` secret with its current context.
 2. Run bootstrap to install controllers, generate and commit ciphertext for the
    active `us-east` overlay, then register the Argo CD application sets.
-3. Confirm Argo CD has created application Secrets in namespace `bookit` and the
+3. Confirm Argo CD has created application Secrets in namespace `default` and the
    Alertmanager Secret in `monitoring`.
 4. Run CI to build images and update their GitOps tags. CI does not access the
    cluster or regenerate runtime secrets.
+
+### Namespace migration
+
+SealedSecret ciphertext is bound to its target namespace. After moving an
+existing cluster from `bookit` to `default`, regenerate the application
+SealedSecrets with the cluster's current controller key before syncing Argo CD:
+
+```bash
+cd bookit-k8s
+./scripts/seal-cluster-secrets.sh dev us-east YOUR_KUBE_CONTEXT
+```
+
+The script now seals application secrets for `default`; it never prints their
+values. Commit the regenerated ciphertext together with this namespace change.
 
 Bootstrap uses `development` secrets and GitOps branch `deployment1` when run
 from `deployment1`; the `main` branch uses `production` secrets and GitOps branch
@@ -313,7 +327,7 @@ Recommended production topology:
 installers. Install their compatible operators before enabling the feature.
 The same package pins and installs the ECK 3.5.0 CRDs/operator and creates a
 three-node Elasticsearch 9.5.0 cluster with 50 GiB per node. ECK exposes it as
-`bookit-elasticsearch-es-http.bookit.svc.cluster.local:9200`. Internal HTTP TLS
+`bookit-elasticsearch-es-http.default.svc.cluster.local:9200`. Internal HTTP TLS
 and Elasticsearch authentication are disabled because the current search
 client does not load an ECK CA or credentials; keep that Service cluster-only
 and enforce namespace NetworkPolicies. Enable ECK authentication and TLS before
@@ -501,9 +515,9 @@ After Argo CD syncs the secrets and deployments, restart existing pods if an ima
 update has not already replaced them (environment variables are read at startup):
 
 ```bash
-kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout restart deployment/http-server deployment/notification-worker
-kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout status deployment/http-server --timeout=120s
-kubectl --context YOUR_KUBE_CONTEXT -n bookit rollout status deployment/notification-worker --timeout=120s
+kubectl --context YOUR_KUBE_CONTEXT -n default rollout restart deployment/http-server deployment/notification-worker
+kubectl --context YOUR_KUBE_CONTEXT -n default rollout status deployment/http-server --timeout=120s
+kubectl --context YOUR_KUBE_CONTEXT -n default rollout status deployment/notification-worker --timeout=120s
 ```
 
 Gmail defaults to port 465 with `SMTP_SECURE=true` (implicit TLS). If you use port

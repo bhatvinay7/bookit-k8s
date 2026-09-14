@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: bookit-alerts
-  namespace: bookit
+  namespace: default
   labels:
     release: kube-prometheus-stack
   annotations:
@@ -34,7 +34,7 @@ spec:
 
         # USE Method Alerts (Infrastructure level)
         - alert: PodCrashLoopBackOff
-          expr: rate(kube_pod_container_status_restarts_total{namespace="bookit"}[5m]) > 0
+          expr: rate(kube_pod_container_status_restarts_total{namespace="default"}[5m]) > 0
           for: 5m
           labels:
             severity: critical
@@ -43,7 +43,7 @@ spec:
             description: "Pod {{ $labels.pod }} is crashlooping."
 
         - alert: HighMemoryUsage
-          expr: sum(container_memory_usage_bytes{namespace="bookit", container!=""}) by (pod) / sum(kube_pod_container_resource_limits{resource="memory", namespace="bookit"}) by (pod) > 0.90
+          expr: sum(container_memory_usage_bytes{namespace="default", container!=""}) by (pod) / sum(kube_pod_container_resource_limits{resource="memory", namespace="default"}) by (pod) > 0.90
           for: 5m
           labels:
             severity: warning

@@ -89,7 +89,7 @@ spec:
                 tracesToLogsV2:
                   datasourceUid: loki
                   customQuery: true
-                  query: '{namespace="bookit"} |= "$${__span.traceId}"'
+                  query: '{namespace="default"} |= "$${__span.traceId}"'
                   filterByTraceID: false
                   filterBySpanID: false
                   spanStartTimeShift: -1m
