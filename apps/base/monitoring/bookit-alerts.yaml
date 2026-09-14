@@ -14,23 +14,22 @@ spec:
       rules:
         # RED Method Alerts (Application level)
         - alert: HighErrorRate
-          expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 0.05
+          expr: sum by (service_name) (rate(bookit_traces_spanmetrics_calls_total{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER",status_code="STATUS_CODE_ERROR"}[5m])) / sum by (service_name) (rate(bookit_traces_spanmetrics_calls_total{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m])) > 0.05
           for: 2m
           labels:
             severity: critical
           annotations:
-            summary: High HTTP error rate on {{ $labels.job }}
-            description: "{{ $labels.job }} has an error rate of > 5% over the last 5 minutes."
+            summary: High error rate on {{ $labels.service_name }}
+            description: "{{ $labels.service_name }} has an error rate above 5% over the last 5 minutes."
 
         - alert: HighLatency
-          # Placeholder expression for latency if histogram metrics exist
-          expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2
+          expr: histogram_quantile(0.95, sum by (le, service_name) (rate(bookit_traces_spanmetrics_duration_seconds_bucket{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m]))) > 2
           for: 5m
           labels:
             severity: warning
           annotations:
-            summary: High latency on {{ $labels.job }}
-            description: "95th percentile latency on {{ $labels.job }} is over 2 seconds for 5 minutes."
+            summary: High latency on {{ $labels.service_name }}
+            description: "95th percentile latency on {{ $labels.service_name }} is over 2 seconds for 5 minutes."
 
         # USE Method Alerts (Infrastructure level)
         - alert: PodCrashLoopBackOff

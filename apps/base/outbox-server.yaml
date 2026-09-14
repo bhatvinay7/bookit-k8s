@@ -54,12 +54,25 @@ spec:
             - --migrate-only
           command:
             - outbox-server
+          envFrom:
+            - secretRef:
+                name: backend-secrets
+            - configMapRef:
+                name: bookit-config
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
                   key: DATABASE_URL
                   name: backend-secrets
+            - name: OTEL_SERVICE_NAME
+              value: bookit-outbox-server-migration
+            - name: K8S_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: k8s.namespace.name=$(K8S_NAMESPACE),k8s.pod.name=$(POD_NAME)
           image: bookit-outbox-server:latest
           name: migrate-payment-outbox
       serviceAccountName: bookit-app
