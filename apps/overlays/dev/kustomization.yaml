@@ -159,7 +159,7 @@ images:
   newTag: commit-1a708d1
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-4b469cb
+  newTag: commit-3cc3118
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
   newTag: commit-f9c34e0
