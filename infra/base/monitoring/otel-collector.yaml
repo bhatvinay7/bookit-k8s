@@ -12,6 +12,9 @@ spec:
       app: otel-collector
   template:
     metadata:
+      annotations:
+        # Roll the pod when switching the telemetry pipeline in this release.
+        bookit.io/telemetry-config-revision: "2"
       labels:
         app: otel-collector
     spec:
@@ -64,7 +67,9 @@ data:
 
     connectors:
       spanmetrics:
+        namespace: traces.spanmetrics
         histogram:
+          unit: s
           explicit:
             buckets: [2ms, 5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s]
 

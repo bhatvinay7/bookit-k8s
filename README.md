@@ -91,8 +91,7 @@ flowchart LR
     G & H & S & W & P -->|OTLP traces and metrics| O
     G & H & S & W & P -->|JSON stdout/stderr| C
     C --> F
-    F -->|OTLP HTTP logs| O
-    O -->|logs| L
+    F -->|Loki push API| L
     O -->|traces| T
     O -->|Prometheus endpoint| PM
     N -->|node, pod and container CPU/memory| PM
@@ -104,13 +103,12 @@ flowchart LR
 Rust services write one JSON object per line to standard output. Kubernetes'
 container runtime writes those records to `/var/log/containers`. One Fluent
 Bit pod runs on every node, tails the local CRI files, attaches pod, namespace,
-container, label and stream metadata, and forwards logs over OTLP HTTP to the
-collector. Fluent Bit uses a disk-backed tail database and filesystem buffering
-so a short collector outage does not immediately lose its read position.
+container, label and stream metadata, and forwards JSON logs to Loki’s push API.
+Fluent Bit uses a disk-backed tail database and filesystem buffering so a short
+Loki outage does not immediately lose its read position.
 
-The collector applies memory limiting and batching before sending logs to Loki.
 Promtail is disabled deliberately: enabling Promtail and Fluent Bit together
-would ingest and bill for every log twice. Loki has a 50 GiB persistent volume
+would ingest and bill for every log twice. Loki has a 10 GiB persistent volume
 in the baseline configuration. Log records must not contain credentials,
 tokens, payment data or raw personal information.
 
@@ -131,10 +129,13 @@ driver-level query spans require wrapping each client operation or adopting a
 compatible instrumented client. Treat that as a release criterion before
 claiming complete query tracing.
 
-Tempo's baseline manifest uses node-local `/tmp` block and WAL storage. It is
-suitable for development and short-lived diagnostics, not durable production
-history. Production must move Tempo to object storage, run distributed
-components, and test retention and recovery.
+Tempo stores blocks and WAL on a 10 GiB `tempo-data` PVC mounted at `/var/tempo`.
+The single replica survives pod replacement but is not highly available. The
+configured 15-day trace retention is a time limit, not a capacity guarantee.
+Existing traces in the former `/tmp` directory are not migrated automatically.
+
+For the coverage matrix, trace-to-log queries and deployment checks, see
+[distributed tracing verification](docs/observability.md).
 
 ### Metrics and CPU monitoring
 
@@ -166,8 +167,8 @@ safe baseline to load-test, not a throughput guarantee.
 | Fluent Bit                   | One pod per node           | 50 MiB memory buffer plus node-local filesystem backlog                         | Per-node log bytes/sec and disk; enforce log levels, rotation and payload limits                                                 |
 | OTEL Collector               | Two replicas               | 1 GiB limit each, 768 MiB limiter, 2,048-item batches, 10,000-item trace queues | Signal bytes/sec and exporter latency; shard or autoscale collectors and watch refused/dropped telemetry                         |
 | Prometheus                   | One stack per cluster      | 15-day retention                                                                | Active series × scrape frequency × retention; control labels/cardinality, add persistent storage, then shard or use remote-write |
-| Loki                         | Single persistent baseline | 50 GiB PVC                                                                      | Compressed log bytes/day × retention; move to object storage and distributed Loki before sustained high volume                   |
-| Tempo                        | Single ephemeral baseline  | Batched collector exports                                                       | Spans/sec × average span size × retention; add sampling and object-backed distributed Tempo                                      |
+| Loki                         | Single persistent baseline | 10 GiB PVC                                                                      | Compressed log bytes/day × retention; move to object storage and distributed Loki before sustained high volume                   |
+| Tempo                        | Single persistent replica  | 10 GiB PVC for blocks and WAL, 15-day retention                                | Spans/sec × average span size × retention; add sampling and object-backed distributed Tempo                                      |
 
 Capacity planning starts with measurements. Load-test expected peak traffic plus
 failure bursts, then record: request and error rate, p95/p99 latency, active
@@ -190,12 +191,13 @@ Control observability growth with these rules:
 ### Failure behavior
 
 Application requests do not synchronously depend on Loki, Tempo or Prometheus.
-If the collector is unavailable, Fluent Bit buffers logs on the node and OTLP
-SDK/collector queues absorb bounded bursts; once those bounds are exhausted,
-telemetry is dropped rather than blocking booking traffic. Prometheus continues
+If Loki is unavailable, Fluent Bit buffers logs on the node. OTLP SDK/collector
+queues absorb bounded trace bursts during collector/Tempo outages; once those
+bounds are exhausted, telemetry is dropped rather than blocking booking traffic.
+Prometheus continues
 scraping node and Kubernetes metrics independently. A node loss can still lose
-that node's unsent Fluent Bit backlog, and the baseline Tempo storage is lost
-with its pod, which is why remote durable storage is required for production.
+that node's unsent Fluent Bit backlog. Tempo uses a persistent volume, but volume
+deletion still loses traces; use backups/object storage for recovery requirements.
 
 ## GitHub environments and secrets
 

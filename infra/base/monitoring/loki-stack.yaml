@@ -26,6 +26,11 @@ spec:
             accessModes:
               - ReadWriteOnce
             size: 10Gi
+        grafana:
+          sidecar:
+            datasources:
+              # kube-prometheus-stack provisions the stable Loki UID.
+              enabled: false
         promtail:
           # Fluent Bit owns the node log tailing path. Running both agents would
           # duplicate every container log in Loki.

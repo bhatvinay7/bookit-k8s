@@ -6,6 +6,7 @@ promotion must pass --require-images prod to reject incomplete releases.
 """
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -65,6 +66,68 @@ def namespace(obj, fallback):
 
 def matches(labels, selector):
     return all(labels.get(k) == v for k, v in selector.items())
+
+
+def check_observability(apps, infra, values):
+    """Check contracts across the independently deployed telemetry components."""
+    def resource(kind, name):
+        return next(d for d in apps + infra
+                    if d["kind"] == kind and d["metadata"]["name"] == name)
+
+    sources = {d["uid"]: d for d in values["grafana"]["additionalDataSources"]}
+    tempo, loki = sources["tempo"], sources["loki"]
+    check(tempo["url"] == "http://tempo.monitoring.svc.cluster.local:3200",
+          "Grafana must query Tempo's HTTP API, not its OTLP receiver")
+    check(loki["url"] == "http://loki-stack.monitoring.svc.cluster.local:3100",
+          "Loki datasource must resolve to the Loki Helm Service")
+    link = tempo["jsonData"]["tracesToLogsV2"]
+    check(link["datasourceUid"] == loki["uid"] and link["customQuery"]
+          and '{namespace="bookit"}' in link["query"]
+          and "$${__span.traceId}" in link["query"],
+          "Trace-to-log link must use the ingested labels and an escaped trace ID variable")
+    derived = loki["jsonData"]["derivedFields"][0]
+    trace_id = "a" * 32
+    # Fluent Bit preserves both compact/pretty JSON and nested merged events.
+    for line in [json.dumps({"trace_id": trace_id}),
+                 json.dumps({"event": {"trace_id": trace_id}}, separators=(",", ":"))]:
+        match = re.search(derived["matcherRegex"], line)
+        check(match and match.group(1) == trace_id and derived["datasourceUid"] == tempo["uid"],
+              "Loki derived field must resolve JSON trace IDs back to Tempo")
+
+    collector = yaml.safe_load(resource("ConfigMap", "otel-collector-config")["data"]["config.yaml"])
+    connector = collector["connectors"]["spanmetrics"]
+    check(connector["namespace"] == "traces.spanmetrics" and connector["histogram"]["unit"] == "s",
+          "Spanmetric namespace/units must agree with Grafana queries")
+    queries = str(tempo["jsonData"]["tracesToMetrics"]["queries"])
+    check("bookit_traces_spanmetrics_duration_seconds_bucket" in queries and "latency_bucket" not in queries,
+          "Grafana must use the connector's duration histogram")
+    check(collector["exporters"]["otlp/tempo"]["endpoint"] == "tempo.monitoring.svc.cluster.local:4317",
+          "Collector must send traces to Tempo's gRPC receiver")
+    tailer = resource("ConfigMap", "fluent-bit-config")["data"]["fluent-bit.conf"]
+    check(re.search(r"Name\s+loki\b", tailer)
+          and "namespace=$kubernetes['namespace_name']" in tailer,
+          "Fluent Bit must provide the Loki namespace label used in Grafana")
+    loki_values = yaml.safe_load(resource("Application", "loki-stack")["spec"]["source"]["helm"]["values"])
+    check(loki_values["loki"]["persistence"]["enabled"] and not loki_values["promtail"]["enabled"],
+          "Loki must persist logs and use only one node tailer")
+    check(not loki_values["grafana"]["sidecar"]["datasources"]["enabled"],
+          "Loki chart must not provision a second datasource with a different UID")
+    tempo_pod = resource("Deployment", "tempo")["spec"]["template"]["spec"]
+    mounts = tempo_pod["containers"][0]["volumeMounts"]
+    mount = next(m for m in mounts if m["mountPath"] == "/var/tempo")
+    volume = next(v for v in tempo_pod["volumes"] if v["name"] == mount["name"])
+    resource("PersistentVolumeClaim", volume["persistentVolumeClaim"]["claimName"])
+    storage = yaml.safe_load(resource("ConfigMap", "tempo-config")["data"]["tempo.yaml"])["storage"]["trace"]
+    check(all(storage[key]["path"].startswith(mount["mountPath"] + "/") for key in ["local", "wal"]),
+          "Both Tempo blocks and WAL must reside on the PVC")
+    web = resource("Deployment", "web")["spec"]["template"]["spec"]["containers"][0]
+    env = {e["name"]: e.get("value") for e in web["env"]}
+    check(env["OTEL_EXPORTER_OTLP_ENDPOINT"].endswith(":4318")
+          and env["OTEL_EXPORTER_OTLP_PROTOCOL"] == "http/protobuf",
+          "Next.js exporter needs the collector HTTP endpoint")
+    dashboard = resource("ConfigMap", "bookit-distributed-tracing-dashboard")
+    for content in dashboard["data"].values():
+        json.loads(content)
 
 
 def main():
@@ -162,6 +225,8 @@ def main():
         )
         helm = stack["spec"]["source"]["helm"]
         values = yaml.safe_load(helm["values"])
+        if project == "bookit":
+            check_observability(apps, infra, values)
         check(
             helm.get("skipCrds") is False and values["crds"]["enabled"],
             "Prometheus CRDs must be included",

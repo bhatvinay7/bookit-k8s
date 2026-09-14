@@ -7,6 +7,8 @@ metadata:
     app: tempo
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: tempo
@@ -15,6 +17,8 @@ spec:
       labels:
         app: tempo
     spec:
+      securityContext:
+        fsGroup: 10001
       containers:
         - name: tempo
           image: grafana/tempo:2.2.0
@@ -24,12 +28,28 @@ spec:
             - containerPort: 3200
             - containerPort: 4317
             - containerPort: 4318
-          resources: {}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3200
+            initialDelaySeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           volumeMounts:
             - name: tempo-config
               mountPath: /etc/tempo.yaml
               subPath: tempo.yaml
+            - name: tempo-data
+              mountPath: /var/tempo
       volumes:
+        - name: tempo-data
+          persistentVolumeClaim:
+            claimName: tempo-data
         - name: tempo-config
           configMap:
             name: tempo-config
@@ -63,9 +83,21 @@ data:
       trace:
         backend: local
         local:
-          path: /tmp/tempo/blocks
+          path: /var/tempo/blocks
         wal:
-          path: /tmp/tempo/wal
+          path: /var/tempo/wal
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tempo-data
+  namespace: monitoring
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: do-block-storage
+  resources:
+    requests:
+      storage: 10Gi
 ---
 apiVersion: v1
 kind: Service

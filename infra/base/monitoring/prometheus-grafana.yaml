@@ -88,8 +88,10 @@ spec:
               jsonData:
                 tracesToLogsV2:
                   datasourceUid: loki
-                  filterByTraceID: true
-                  filterBySpanID: true
+                  customQuery: true
+                  query: '{namespace="bookit"} |= "$${__span.traceId}"'
+                  filterByTraceID: false
+                  filterBySpanID: false
                   spanStartTimeShift: -1m
                   spanEndTimeShift: 1m
                 tracesToMetrics:
@@ -99,13 +101,11 @@ spec:
                       value: service_name
                   queries:
                     - name: Request rate
-                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags}[5m]))
+                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags,span_kind="SPAN_KIND_SERVER"}[5m]))
                     - name: Error rate
-                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags,status_code="STATUS_CODE_ERROR"}[5m]))
+                      query: sum(rate(bookit_traces_spanmetrics_calls_total{$$__tags,span_kind="SPAN_KIND_SERVER",status_code="STATUS_CODE_ERROR"}[5m]))
                     - name: p99 latency
-                      query: histogram_quantile(0.99,sum(rate(bookit_traces_spanmetrics_latency_bucket{$$__tags}[5m]))by(le))
-                serviceMap:
-                  datasourceUid: prometheus
+                      query: histogram_quantile(0.99,sum(rate(bookit_traces_spanmetrics_duration_seconds_bucket{$$__tags,span_kind="SPAN_KIND_SERVER"}[5m]))by(le))
                 nodeGraph:
                   enabled: true
             - name: Loki
@@ -116,7 +116,7 @@ spec:
               jsonData:
                 derivedFields:
                   - name: TraceID
-                    matcherRegex: '"trace_id":"([0-9a-f]+)"'
+                    matcherRegex: '"trace_id"\s*:\s*"([0-9a-f]{32})"'
                     datasourceUid: tempo
                     url: $${__value.raw}
         kube-state-metrics:
