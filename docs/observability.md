@@ -65,13 +65,13 @@ gateway server span, gateway client span, and HTTP server span with the same
 trace ID and correct parent relationships. Click the span's logs link. It uses:
 
 ```logql
-{namespace="bookit"} |= "YOUR_TRACE_ID"
+{namespace="default"} |= "YOUR_TRACE_ID"
 ```
 
 For errors only, use parsed merged JSON fields:
 
 ```logql
-{namespace="bookit"} |= "YOUR_TRACE_ID" | json | event_level="ERROR"
+{namespace="default"} |= "YOUR_TRACE_ID" | json | event_level="ERROR"
 ```
 
 The automatic link intentionally includes the whole trace, so child-service

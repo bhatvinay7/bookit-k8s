@@ -5,7 +5,7 @@
 not install the CRDs. Application sync waves also need a child Application
 health customization to wait for a Helm child to finish.
 
-The application namespace is `bookit`. Monitoring resources live in `monitoring`;
+The application namespace is `default`. Monitoring resources live in `monitoring`;
 the Helm Application object lives in `argocd`. These are separate concerns.
 
 After publishing these GitOps changes, rerun the application repository's

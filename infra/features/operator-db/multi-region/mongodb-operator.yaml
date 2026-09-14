@@ -2,7 +2,7 @@ apiVersion: psmdb.percona.com/v1-120
 kind: PerconaServerMongoDB
 metadata:
   name: bookit-mongodb-cluster
-  namespace: bookit
+  namespace: default
 spec:
   crVersion: 1.12.0
   image: percona/percona-server-mongodb:6.0.8-7

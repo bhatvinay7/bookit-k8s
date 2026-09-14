@@ -82,7 +82,7 @@ def check_observability(apps, infra, values):
           "Loki datasource must resolve to the Loki Helm Service")
     link = tempo["jsonData"]["tracesToLogsV2"]
     check(link["datasourceUid"] == loki["uid"] and link["customQuery"]
-          and '{namespace="bookit"}' in link["query"]
+          and '{namespace="default"}' in link["query"]
           and "$${__span.traceId}" in link["query"],
           "Trace-to-log link must use the ingested labels and an escaped trace ID variable")
     derived = loki["jsonData"]["derivedFields"][0]
@@ -140,7 +140,9 @@ def main():
         if chess
         else ("auction" if (ROOT / "argocd/chart").exists() else "bookit")
     )
-    app_namespace = "default" if chess else project
+    # BookIt uses Kubernetes' default namespace. Keep the historical project
+    # name for image and metric prefixes; it is not the deployment namespace.
+    app_namespace = "default" if project in {"bookit", "chess"} else project
     targets = (
         [("dev", "apps", "infra")]
         if chess
@@ -348,7 +350,7 @@ def main():
                 template = appset["spec"]["template"]["spec"]
                 check(
                     template["destination"]
-                    == {"server": "{{url}}", "namespace": "bookit"},
+                    == {"server": "{{url}}", "namespace": "default"},
                     "Incorrect Bookit destination",
                 )
                 if "appsPath" in elements[0]:

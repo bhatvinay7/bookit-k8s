@@ -402,7 +402,7 @@ to declared CPU requests. It also powers:
 
 ```bash
 kubectl top nodes
-kubectl top pods -n bookit
+kubectl top pods -n default
 ```
 
 Metrics Server is not historical monitoring. If the cloud provider already
@@ -538,10 +538,10 @@ environment/provider, but application code and Deployment YAML do not:
 
 | Secret key | Managed cloud example | Optional in-cluster example |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://user:pass@provider-host:5432/bookit?sslmode=require` | `postgresql://user:pass@postgres-proxy.bookit.svc.cluster.local:5432/bookit` |
+| `DATABASE_URL` | `postgresql://user:pass@provider-host:5432/bookit?sslmode=require` | `postgresql://user:pass@postgres-proxy.default.svc.cluster.local:5432/bookit` |
 | `REPLICATION_URL` | provider replication user/endpoint with TLS | primary PostgreSQL service with a dedicated replication user |
-| `MONGODB_URL` | `mongodb+srv://user:pass@provider-host/bookit` | `mongodb://user:pass@mongodb-proxy.bookit.svc.cluster.local:27017/bookit?replicaSet=rs0` |
-| `REDIS_URL` | `rediss://user:pass@provider-host:6379` | operator-created master/Sentinel-aware service discovered with `kubectl get svc -n bookit` |
+| `MONGODB_URL` | `mongodb+srv://user:pass@provider-host/bookit` | `mongodb://user:pass@mongodb-proxy.default.svc.cluster.local:27017/bookit?replicaSet=rs0` |
+| `REDIS_URL` | `rediss://user:pass@provider-host:6379` | operator-created master/Sentinel-aware service discovered with `kubectl get svc -n default` |
 | `REDIS_CLUSTER_URL` | managed cluster/configuration endpoint | the same as `REDIS_URL` unless Redis Cluster mode is actually enabled |
 
 Do not copy the examples literally. Confirm the Service names created by the
@@ -814,21 +814,21 @@ kubectl get crd | grep -E 'postgres|percona|redisfailover|servicemonitor'
 Application and autoscaling:
 
 ```bash
-kubectl get deploy,pods,svc,ingress -n bookit
-kubectl get hpa -n bookit
-kubectl describe hpa -n bookit
-kubectl top pods -n bookit
+kubectl get deploy,pods,svc,ingress -n default
+kubectl get hpa -n default
+kubectl describe hpa -n default
+kubectl top pods -n default
 kubectl get apiservice v1beta1.metrics.k8s.io
 ```
 
 Database health:
 
 ```bash
-kubectl get postgresclusters -n bookit
-kubectl get perconaservermongodbs -n bookit
-kubectl get redisfailovers -n bookit
-kubectl get cronjobs,jobs -n bookit
-kubectl get pvc -n bookit
+kubectl get postgresclusters -n default
+kubectl get perconaservermongodbs -n default
+kubectl get redisfailovers -n default
+kubectl get cronjobs,jobs -n default
+kubectl get pvc -n default
 ```
 
 These commands show Kubernetes/operator state. Database-native queries and a
