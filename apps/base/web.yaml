@@ -21,6 +21,10 @@ spec:
             - configMapRef:
                 name: bookit-config
           env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: http/protobuf
             - name: OTEL_SERVICE_NAME
               value: bookit-web
             - name: K8S_NAMESPACE

@@ -42,12 +42,12 @@ patches:
       path: /spec/template/spec/containers/0/resources
       value:
         requests:
-          cpu: 10m
-          memory: 32Mi
+          cpu: 100m
+          memory: 256Mi
           ephemeral-storage: 64Mi
         limits:
-          cpu: 100m
-          memory: 128Mi
+          cpu: 500m
+          memory: 512Mi
           ephemeral-storage: 512Mi
 
 # The collector's configured memory limiter is 768 MiB, so its container limit

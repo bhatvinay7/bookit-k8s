@@ -12,3 +12,4 @@ resources:
   - monitoring/otel-collector-pdb.yaml
   - monitoring/tempo.yaml
   - monitoring/grafana-dashboards.yaml
+  - monitoring/distributed-tracing-dashboard.yaml
