@@ -63,7 +63,6 @@ spec:
         path: infra/overlays/prod
       destination:
         server: "{{url}}"
-        namespace: bookit
       syncPolicy:
         automated:
           prune: true
