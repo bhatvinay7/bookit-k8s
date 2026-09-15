@@ -149,36 +149,36 @@ patches:
 images:
 - name: bookit-cdc-worker
   newName: ghcr.io/bhatvinay7/bookit-cdc-worker
-  newTag: commit-1a708d1
+  newTag: commit-3710e95
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-0ed2fc0
+  newTag: commit-3710e95
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-655571a
+  newTag: commit-3710e95
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-655571a
+  newTag: commit-3710e95
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-bc23c49
+  newTag: commit-3710e95
 - name: bookit-load-test-runner
   newName: ghcr.io/bhatvinay7/bookit-load-test-runner
   # Manual workflow overrides this suspended-template image with the immutable
   # commit image it builds before creating each one-off Kubernetes Job.
-  newTag: commit-344b9ab
+  newTag: commit-425eddd
