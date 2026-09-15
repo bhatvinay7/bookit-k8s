@@ -67,6 +67,33 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: GMAIL_APP_PASSWORD
+            - name: CLOUDFLARE_R2_ACCOUNT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_ACCOUNT_ID
+            - name: CLOUDFLARE_R2_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_ACCESS_KEY_ID
+            - name: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_SECRET_ACCESS_KEY
+            - name: CLOUDFLARE_R2_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_BUCKET
+            - name: CLOUDFLARE_R2_PUBLIC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: CLOUDFLARE_R2_PUBLIC_URL
+            - name: CLOUDFLARE_R2_ENDPOINT
+              value: ""
           image: bookit-notification-worker:latest
           name: notification-worker
           resources:
