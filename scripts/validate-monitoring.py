@@ -155,6 +155,7 @@ def check_observability(apps, infra, values):
         check(
             "bookit_load_test_stage_requested_requests" in content
             and "bookit_load_test_stage_target_rps" in content
+            and "bookit_load_test_rust_lock_requested_requests" in content
             and "k8s_pod_name" in content,
             "Load-test dashboard must expose staged load and per-pod Gateway Keeper metrics",
         )
@@ -268,6 +269,19 @@ def main():
         check(
             gateway_service["spec"].get("clusterIP") != "None",
             "Gateway Keeper must use a ClusterIP Service to balance traffic across HPA replicas",
+        )
+        runner = next(
+            d for d in apps
+            if d["kind"] == "CronJob" and d["metadata"]["name"] == "bookit-rust-lock-load"
+        )
+        runner_spec = runner["spec"]
+        runner_container = runner_spec["jobTemplate"]["spec"]["template"]["spec"]["containers"][0]
+        check(
+            runner_spec.get("suspend") is True
+            and runner_spec.get("concurrencyPolicy") == "Forbid"
+            and runner_container.get("envFrom", [{}])[0].get("configMapRef", {}).get("name")
+            == "manual-load-test-config",
+            "Rust load generator must be a suspended, manually configured CronJob template",
         )
         for d in apps:
             if d["kind"] == "Deployment":

@@ -177,3 +177,8 @@ images:
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-bc23c49
+- name: bookit-load-test-runner
+  newName: ghcr.io/bhatvinay7/bookit-load-test-runner
+  # Manual workflow overrides this suspended-template image with the immutable
+  # commit image it builds before creating each one-off Kubernetes Job.
+  newTag: commit-344b9ab

@@ -1,0 +1,54 @@
+# This CronJob is intentionally suspended. GitHub Actions creates an immutable
+# one-off Job from this template only after a human manually dispatches the
+# load-test workflow. The workflow writes the non-secret, disposable schedule
+# payload to `manual-load-test-config` before creating the Job.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bookit-rust-lock-load
+  namespace: bookit
+  labels:
+    app: bookit-rust-lock-load
+    app.kubernetes.io/component: load-test
+spec:
+  schedule: "0 0 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 16200
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app: bookit-rust-lock-load
+            app.kubernetes.io/component: load-test
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: ghcr-secret
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: runner
+              image: bookit-load-test-runner:latest
+              imagePullPolicy: IfNotPresent
+              envFrom:
+                - configMapRef:
+                    name: manual-load-test-config
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: 512Mi
+                limits:
+                  cpu: "4"
+                  memory: 1Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]

@@ -107,6 +107,7 @@ the password never reaches the Actions log.
 | `peak-spike` | k6 ramps from zero to the selected **target RPS** in one minute, holds it for the selected duration, and ramps down for one minute. It writes a machine-readable summary. | Read-only `GET` only. Use a safe real endpoint and set its exact expected HTTP status/body marker; `/health` is only a connectivity check. |
 | `race-lock` | Ghz sends a sustained gRPC request rate to one supplied isolated test seat, captures a JSON report, checks that every request completed with gRPC `OK`, and always releases the lock. | Development only. It requires a valid `grpc_payload` for a disposable schedule, seat and user. Never use a real event seat. |
 | `single-seat-lock-ramp` | Runs bounded gRPC lock-attempt stages of **5,000 → 15,000 → 20,000 → 30,000 → 50,000 → 600,000**, rate-limited to fill the selected 5m+ stage duration. It verifies gRPC transport results and lock cleanup after every stage, opens WebSocket observers, and uploads one Ghz JSON report per stage. | Development only. It validates and releases the supplied seat before every stage and performs a final unlock even when a stage fails. |
+| `rust-lock-job` | Builds an immutable Rust runner image, then creates a one-off Kubernetes Job from the suspended `bookit-rust-lock-load` CronJob template. Tokio worker threads keep separate gRPC connections to the ClusterIP Gateway Keeper Service while a global scheduler enforces `target_rps × duration`. | Development only. The workflow creates a temporary ConfigMap containing one disposable seat payload, waits for the Job, collects its pod/job logs, and deletes the ConfigMap. The Job fails on a transport error, generator drop, or no accepted lock. |
 | `endurance-soak` | k6 holds a constant target request rate for the selected duration (up to the 5-hour Action limit) and writes a machine-readable summary. | Read-only `GET` only. Start with a low RPS and increase only after reviewing the Grafana data. |
 
 `max_vus` and `target_rps` each accept `1` through `5000`; the defaults are
@@ -170,6 +171,29 @@ Gateway Keeper RED metrics are also split by `k8s.pod.name`, so the dashboard
 can demonstrate traffic reaching multiple ready replicas. The workflow saves
 15-second HPA, pod, resource-usage and Gateway Keeper EndpointSlice snapshots
 along with raw Ghz/k6 JSON reports as an Actions artifact.
+
+### In-cluster Rust lock generator
+
+Select `rust-lock-job` when GitHub-hosted runner egress is the bottleneck. The
+workflow builds `bookit-load-test-runner` for the exact source commit, creates a
+one-off Job from the **suspended** `bookit-rust-lock-load` CronJob, and replaces
+the template image with that immutable commit tag. It never runs on a schedule
+and is blocked for production.
+
+The runner uses Tokio's multithread runtime (`rust_runner_threads`, 1–32) and
+creates independent gRPC connections across `lock_ramp_concurrency` workers.
+The connections are sent to
+`gateway-keeper.bookit.svc.cluster.local:50052`, so Kubernetes distributes them
+over ready Gateway Keeper pods. A single global scheduler admits exactly the
+configured `target_rps × duration` lock attempts; increasing thread count does
+not create an uncontrolled request flood.
+
+The runner reports requested, accepted, conflict, transport-error, dropped, and
+observed-RPS values to Pushgateway. Grafana **testLoad → Bookit Load Test**
+shows them for the GitHub Actions `run_id`, while the workflow artifact contains
+the Job and pod YAML plus the final JSON result log. This is a backend
+Service-level test; use the k6 HTTP scenarios for an external NGINX/Ingress
+test.
 
 The Redis exporter is scraped through a `ServiceMonitor`. Metrics remain in
 Prometheus at its configured retention, so a test run is comparable with later

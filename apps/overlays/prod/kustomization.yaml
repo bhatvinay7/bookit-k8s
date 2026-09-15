@@ -66,3 +66,8 @@ images:
   - name: bookit-ws-server
     newName: ghcr.io/bhatvinay7/bookit-ws-server
     digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+  - name: bookit-load-test-runner
+    newName: ghcr.io/bhatvinay7/bookit-load-test-runner
+    # The CronJob remains suspended and lock tests are blocked by the workflow
+    # in production; retain an explicit production placeholder for validation.
+    digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
