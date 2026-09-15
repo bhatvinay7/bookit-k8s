@@ -1,0 +1,17 @@
+{{- if not .Values.redis.useCloudProvider }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-ha-metrics
+  namespace: bookit
+  labels:
+    app: redis-ha
+spec:
+  selector:
+    matchLabels:
+      app: redis-ha
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+{{- end }}

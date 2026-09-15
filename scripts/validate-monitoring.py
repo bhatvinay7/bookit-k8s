@@ -108,6 +108,11 @@ def check_observability(apps, infra, values):
     connector = collector["connectors"]["spanmetrics"]
     check(connector["namespace"] == "traces.spanmetrics" and connector["histogram"]["unit"] == "s",
           "Spanmetric namespace/units must agree with Grafana queries")
+    check(
+        connector.get("metrics_flush_interval") == "15s"
+        and {d.get("name") for d in connector.get("dimensions", [])} >= {"k8s.pod.name"},
+        "Spanmetrics must expose bounded per-pod data at a load-test-friendly interval",
+    )
     queries = str(tempo["jsonData"]["tracesToMetrics"]["queries"])
     check("bookit_traces_spanmetrics_duration_seconds_bucket" in queries and "latency_bucket" not in queries,
           "Grafana must use the connector's duration histogram")
@@ -138,6 +143,26 @@ def check_observability(apps, infra, values):
     dashboard = resource("ConfigMap", "bookit-distributed-tracing-dashboard")
     for content in dashboard["data"].values():
         json.loads(content)
+    load_test_dashboard = resource("ConfigMap", "bookit-load-test-dashboard")
+    check(
+        load_test_dashboard["metadata"].get("annotations", {}).get("grafana_folder")
+        == "testLoad",
+        "Load-test dashboard must be provisioned in Grafana's testLoad folder",
+    )
+    for content in load_test_dashboard["data"].values():
+        parsed = json.loads(content)
+        check(parsed.get("uid") == "bookit-load-test", "Load-test dashboard UID is incorrect")
+        check(
+            "bookit_load_test_stage_requested_requests" in content
+            and "bookit_load_test_stage_target_rps" in content
+            and "k8s_pod_name" in content,
+            "Load-test dashboard must expose staged load and per-pod Gateway Keeper metrics",
+        )
+    check(
+        values["grafana"]["sidecar"]["dashboards"].get("folderAnnotation")
+        == "grafana_folder",
+        "Grafana dashboard sidecar must honor the testLoad folder annotation",
+    )
 
 
 def main():
@@ -194,6 +219,56 @@ def main():
                             ),
                             f"Ingress backend Service {key} has no matching port {port}",
                         )
+        expected_hpa_targets = {
+            "http-server",
+            "gateway-keeper",
+            "ws-server",
+            "web",
+            "search-server",
+            "lock-server",
+            "payment-processor",
+            "outbox-server",
+            "notification-worker",
+        }
+        deployments = {
+            d["metadata"]["name"]: d
+            for d in apps
+            if d["kind"] == "Deployment"
+        }
+        hpas = {
+            d["metadata"]["name"]: d
+            for d in apps
+            if d["kind"] == "HorizontalPodAutoscaler"
+        }
+        check(
+            expected_hpa_targets == set(hpas),
+            "Every scalable Bookit workload must have exactly one HPA",
+        )
+        for name, hpa in hpas.items():
+            target = hpa["spec"]["scaleTargetRef"]
+            check(
+                target == {"apiVersion": "apps/v1", "kind": "Deployment", "name": name},
+                f"HPA {name} must target its matching Deployment",
+            )
+            check(
+                hpa["spec"]["minReplicas"] == 1 and hpa["spec"]["maxReplicas"] > 1,
+                f"HPA {name} must preserve the one-replica baseline and be able to scale out",
+            )
+            resources = deployments[name]["spec"]["template"]["spec"]["containers"][0]["resources"]
+            check(
+                resources.get("requests", {}).get("cpu") and resources.get("requests", {}).get("memory"),
+                f"HPA {name} requires CPU and memory requests on its target",
+            )
+            metric_resources = {m["resource"]["name"] for m in hpa["spec"]["metrics"]}
+            check(metric_resources == {"cpu", "memory"}, f"HPA {name} must use CPU and memory metrics")
+        gateway_service = next(
+            d for d in apps
+            if d["kind"] == "Service" and d["metadata"]["name"] == "gateway-keeper"
+        )
+        check(
+            gateway_service["spec"].get("clusterIP") != "None",
+            "Gateway Keeper must use a ClusterIP Service to balance traffic across HPA replicas",
+        )
         for d in apps:
             if d["kind"] == "Deployment":
                 for c in d["spec"]["template"]["spec"]["containers"]:
@@ -250,6 +325,30 @@ def main():
             "ServerSideApply=true" in stack["spec"]["syncPolicy"]["syncOptions"],
             "Large CRDs need server-side apply",
         )
+        if project == "bookit":
+            for values_file in [
+                ROOT / "charts/stateful-services/values-development.yaml",
+                ROOT / "charts/stateful-services/values-deployment1.yaml",
+                ROOT / "charts/stateful-services/values-production.yaml",
+            ]:
+                redis = yaml.safe_load(values_file.read_text())["redis"]
+                check(
+                    redis["replicas"] in {3, 5} and redis["proxyReplicas"] >= 2,
+                    f"{values_file.name} must use 3 or 5 Redis members and two proxy replicas",
+                )
+            loadbalancer = render("loadbalancer")
+            ingress_hpa = next(
+                d for d in loadbalancer
+                if d["kind"] == "HorizontalPodAutoscaler"
+                and d["metadata"]["name"] == "ingress-nginx-controller"
+            )
+            check(
+                ingress_hpa["metadata"].get("namespace") == "ingress-nginx"
+                and ingress_hpa["spec"]["scaleTargetRef"]["name"] == "ingress-nginx-controller"
+                and ingress_hpa["spec"]["minReplicas"] == 1
+                and ingress_hpa["spec"]["maxReplicas"] > 1,
+                "Ingress controller must have a scalable one-replica baseline",
+            )
         spec = values["prometheus"]["prometheusSpec"]
         check(
             spec["serviceMonitorSelectorNilUsesHelmValues"] is False

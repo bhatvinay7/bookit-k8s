@@ -15,6 +15,16 @@ mongodb:
 
 redis:
   useCloudProvider: false
+  # Redis members are a fixed HA topology. Use 3 (default) or 5; do not HPA a
+  # stateful primary/replica set. The stateless Redis proxy can autoscale.
+  replicas: 3
+  proxyReplicas: 2
+  proxyAutoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
   storageClassName: do-block-storage
   resources:
     requests:
@@ -23,6 +33,13 @@ redis:
     limits:
       cpu: "1"
       memory: "1Gi"
+  proxyResources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
 
 rabbitmq:
   useCloudProvider: true

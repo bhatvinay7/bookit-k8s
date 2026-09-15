@@ -68,6 +68,12 @@ data:
     connectors:
       spanmetrics:
         namespace: traces.spanmetrics
+        # POD_NAME is attached as k8s.pod.name by every Bookit workload. Keep
+        # it as a bounded RED-metric dimension so a load run can demonstrate
+        # that Gateway Keeper traffic reaches more than one ready replica.
+        dimensions:
+          - name: k8s.pod.name
+        metrics_flush_interval: 15s
         histogram:
           unit: s
           explicit:

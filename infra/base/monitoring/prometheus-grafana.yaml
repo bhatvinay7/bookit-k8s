@@ -84,6 +84,9 @@ spec:
               enabled: true
               label: grafana_dashboard
               labelValue: "1"
+              # ConfigMaps with this annotation appear in the named Grafana
+              # folder; the load-test dashboard uses the testLoad folder.
+              folderAnnotation: grafana_folder
               searchNamespace: ALL
           additionalDataSources:
             - name: Tempo

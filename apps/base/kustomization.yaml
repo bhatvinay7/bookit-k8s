@@ -15,6 +15,7 @@ resources:
 - cdc-worker.yaml
 - search-server.yaml
 - web.yaml
+- hpa.yaml
 - ingress.yaml
 - grpc-ingress.yaml
 - monitoring/bookit-alerts.yaml

@@ -95,6 +95,8 @@ spec:
       name: redis
     - port: 26379
       name: sentinel
+    - port: 9121
+      name: metrics
   clusterIP: None
   selector:
     app: redis-ha
@@ -124,6 +126,8 @@ spec:
                 secretKeyRef: {name: custom-db-ha-secrets, key: redis-password}
           ports:
             - containerPort: 6379
+          resources:
+{{ toYaml .Values.redis.proxyResources | indent 12 }}
           volumeMounts:
             - name: haproxy-config
               mountPath: /usr/local/etc/haproxy
