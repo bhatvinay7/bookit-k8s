@@ -94,6 +94,16 @@ def check_observability(apps, infra, values):
         check(match and match.group(1) == trace_id and derived["datasourceUid"] == tempo["uid"],
               "Loki derived field must resolve JSON trace IDs back to Tempo")
 
+    alertmanager = values["alertmanager"]
+    smtp = alertmanager["config"]["global"]
+    check(
+        "smtp_auth_password" not in smtp
+        and smtp.get("smtp_auth_password_file")
+        == "/etc/alertmanager/secrets/alertmanager-secret/smtp_auth_password"
+        and "alertmanager-secret" in alertmanager["alertmanagerSpec"].get("secrets", []),
+        "Alertmanager must mount the sealed SMTP credential instead of storing it in Helm values",
+    )
+
     collector = yaml.safe_load(resource("ConfigMap", "otel-collector-config")["data"]["config.yaml"])
     connector = collector["connectors"]["spanmetrics"]
     check(connector["namespace"] == "traces.spanmetrics" and connector["histogram"]["unit"] == "s",

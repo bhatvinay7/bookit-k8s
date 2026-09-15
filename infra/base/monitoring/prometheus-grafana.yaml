@@ -24,9 +24,11 @@ spec:
             global:
               resolve_timeout: 5m
               smtp_smarthost: 'smtp.gmail.com:587'
-              smtp_from: 'alerts@bookit4u.shop'
+              smtp_from: 'tickethandle24@gmail.com'
               smtp_auth_username: 'tickethandle24@gmail.com'
-              smtp_auth_password: 'SET_YOUR_GMAIL_APP_PASSWORD_HERE'
+              # Mounted from the SealedSecret as a file; never place the SMTP
+              # app password in the Helm values stored in Git.
+              smtp_auth_password_file: '/etc/alertmanager/secrets/alertmanager-secret/smtp_auth_password'
               smtp_require_tls: true
             route:
               group_by: ['namespace', 'alertname']
@@ -44,6 +46,10 @@ spec:
                   - to: 'tickethandle24@gmail.com'
                     send_resolved: true
           alertmanagerSpec:
+            # The Prometheus Operator mounts listed Secrets beneath
+            # /etc/alertmanager/secrets/<secret-name>/.
+            secrets:
+              - alertmanager-secret
             resources:
               requests:
                 cpu: 10m
