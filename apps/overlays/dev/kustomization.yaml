@@ -168,7 +168,7 @@ images:
   newTag: commit-bc23c49
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-75a4514
+  newTag: commit-655571a
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
   newTag: commit-bc23c49
@@ -180,7 +180,7 @@ images:
   newTag: commit-bc23c49
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
-  newTag: commit-75a4514
+  newTag: commit-655571a
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
   newTag: commit-bc23c49
