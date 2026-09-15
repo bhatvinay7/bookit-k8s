@@ -20,6 +20,9 @@ command -v kubeseal >/dev/null || { echo "kubeseal is required" >&2; exit 1; }
 [[ "${CLOUDFLARE_R2_ACCOUNT_ID:-}" =~ ^[[:xdigit:]]{32}$ ]] || {
   echo "CLOUDFLARE_R2_ACCOUNT_ID must contain 32 hexadecimal characters" >&2; exit 1;
 }
+[[ "${CLOUDFLARE_R2_ACCESS_KEY_ID:-}" =~ ^[^[:space:]]{32}$ ]] || {
+  echo "CLOUDFLARE_R2_ACCESS_KEY_ID must contain exactly 32 non-whitespace characters" >&2; exit 1;
+}
 export CLOUDFLARE_R2_ENDPOINT="https://${CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 export SMTP_HOST="${SMTP_HOST:-smtp.gmail.com}"
 export SMTP_PORT="${SMTP_PORT:-465}"
