@@ -159,28 +159,28 @@ images:
   newTag: commit-1a708d1
 - name: bookit-gateway-keeper
   newName: ghcr.io/bhatvinay7/bookit-gateway-keeper
-  newTag: commit-b5af8ff
+  newTag: commit-bc23c49
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-b5af8ff
+  newTag: commit-bc23c49
 - name: bookit-lock-server
   newName: ghcr.io/bhatvinay7/bookit-lock-server
-  newTag: commit-b5af8ff
+  newTag: commit-bc23c49
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-f9c34e0
+  newTag: commit-bc23c49
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
-  newTag: commit-707791d
+  newTag: commit-bc23c49
 - name: bookit-payment-processor
   newName: ghcr.io/bhatvinay7/bookit-payment-processor
-  newTag: commit-b5af8ff
+  newTag: commit-bc23c49
 - name: bookit-search-server
   newName: ghcr.io/bhatvinay7/bookit-search-server
-  newTag: commit-f9c34e0
+  newTag: commit-bc23c49
 - name: bookit-web
   newName: ghcr.io/bhatvinay7/bookit-web
   newTag: commit-1e9b17c
 - name: bookit-ws-server
   newName: ghcr.io/bhatvinay7/bookit-ws-server
-  newTag: commit-b5af8ff
+  newTag: commit-bc23c49
