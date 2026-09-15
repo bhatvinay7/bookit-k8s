@@ -38,17 +38,10 @@ labels:
 # Test-server resource profile. This patch applies uniformly to every Bookit
 # Deployment in the development overlay; production retains the base sizing.
 
-# A test cluster may burst to two pods per workload without allowing a noisy
-# service to consume the complete node.
+# A test cluster may burst from the one-pod baseline without allowing a noisy
+# service to consume the complete node. HPAs in the base own replica counts
+# after the initial deployment.
 patches:
-- patch: |-
-    $patch: delete
-    apiVersion: autoscaling/v2
-    kind: HorizontalPodAutoscaler
-    metadata:
-      name: unused
-  target:
-    kind: HorizontalPodAutoscaler
 - patch: |-
     - op: replace
       path: /spec/tls/0/hosts/0

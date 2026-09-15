@@ -1,0 +1,171 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bookit-load-test-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: testLoad
+data:
+  load-test.json: |-
+    {
+      "uid": "bookit-load-test",
+      "title": "Bookit Load Test",
+      "tags": ["bookit", "testLoad", "autoscaling"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "time": {"from": "now-1h", "to": "now"},
+      "description": "Use this dashboard while a manually triggered load-test workflow is running. It records Prometheus application, HPA, ingress, Redis, node and trace metrics; selecting the test window is sufficient—no test credentials are stored in Grafana.",
+      "templating": {
+        "list": [
+          {
+            "name": "namespace",
+            "type": "custom",
+            "query": "bookit",
+            "current": {"text": "bookit", "value": "bookit"}
+          },
+          {
+            "name": "service",
+            "type": "query",
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "query": "label_values(bookit_traces_spanmetrics_calls_total{service_name=~\"bookit-.*\"},service_name)",
+            "includeAll": true,
+            "multi": true,
+            "allValue": ".*",
+            "current": {"text": "All", "value": "$__all"}
+          },
+          {
+            "name": "run_id",
+            "type": "query",
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "query": "label_values(bookit_load_test_stage_requested_requests,run_id)",
+            "refresh": 2,
+            "includeAll": false
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Application request rate",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+          "targets": [{"refId": "A", "expr": "sum by(service_name)(rate(bookit_traces_spanmetrics_calls_total{service_name=~\"$service\",span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"}[1m]))", "legendFormat": "{{service_name}}"}]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "Application error rate",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+          "targets": [{"refId": "A", "expr": "sum by(service_name)(rate(bookit_traces_spanmetrics_calls_total{service_name=~\"$service\",span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\",status_code=\"STATUS_CODE_ERROR\"}[1m]))", "legendFormat": "{{service_name}}"}]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "p95 processing latency",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+          "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, sum by(le,service_name)(rate(bookit_traces_spanmetrics_duration_seconds_bucket{service_name=~\"$service\",span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"}[1m])))", "legendFormat": "{{service_name}}"}]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Ingress requests",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+          "targets": [{"refId": "A", "expr": "sum by(ingress,status)(rate(nginx_ingress_controller_requests[1m]))", "legendFormat": "{{ingress}} {{status}}"}]
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "HPA current and desired replicas",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace=\"$namespace\"}", "legendFormat": "current {{horizontalpodautoscaler}}"},
+            {"refId": "B", "expr": "kube_horizontalpodautoscaler_status_desired_replicas{namespace=\"$namespace\"}", "legendFormat": "desired {{horizontalpodautoscaler}}"}
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Pod CPU utilisation against requests",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []},
+          "targets": [{"refId": "A", "expr": "100 * sum by(pod)(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container!=\"\",image!=\"\"}[1m])) / clamp_min(sum by(pod)(kube_pod_container_resource_requests{namespace=\"$namespace\",resource=\"cpu\",unit=\"core\"}), 0.001)", "legendFormat": "{{pod}}"}]
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Redis commands, clients and memory",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 24, "w": 24, "h": 8},
+          "fieldConfig": {"defaults": {}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "sum(rate(redis_commands_processed_total[1m]))", "legendFormat": "commands/s"},
+            {"refId": "B", "expr": "sum(redis_connected_clients)", "legendFormat": "connected clients"},
+            {"refId": "C", "expr": "sum(redis_memory_used_bytes)", "legendFormat": "memory bytes"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Recorded single-seat lock ramp stages",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 32, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "bookit_load_test_stage_requested_requests{run_id=\"$run_id\"}", "legendFormat": "requested {{stage}}"},
+            {"refId": "B", "expr": "bookit_load_test_stage_completed_requests{run_id=\"$run_id\"}", "legendFormat": "completed {{stage}}"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "timeseries",
+          "title": "Recorded lock-ramp throughput and duration",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 12, "y": 32, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "bookit_load_test_stage_rps{run_id=\"$run_id\"}", "legendFormat": "rps {{stage}}"},
+            {"refId": "B", "expr": "bookit_load_test_stage_duration_seconds{run_id=\"$run_id\"}", "legendFormat": "seconds {{stage}}"},
+            {"refId": "C", "expr": "bookit_load_test_ws_observers{run_id=\"$run_id\"}", "legendFormat": "websocket observers"},
+            {"refId": "D", "expr": "bookit_load_test_stage_grpc_status_requests{run_id=\"$run_id\"}", "legendFormat": "{{stage}} {{grpc_status}}"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "timeseries",
+          "title": "Lock-ramp target versus observed throughput",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 0, "y": 40, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "bookit_load_test_stage_target_rps{run_id=\"$run_id\"}", "legendFormat": "target {{stage}}"},
+            {"refId": "B", "expr": "bookit_load_test_stage_rps{run_id=\"$run_id\"}", "legendFormat": "observed {{stage}}"}
+          ]
+        },
+        {
+          "id": 11,
+          "type": "timeseries",
+          "title": "Gateway Keeper request rate by pod",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"x": 12, "y": 40, "w": 12, "h": 8},
+          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+          "targets": [
+            {"refId": "A", "expr": "sum by(k8s_pod_name)(rate(bookit_traces_spanmetrics_calls_total{service_name=\"bookit-gateway-keeper\",span_kind=\"SPAN_KIND_SERVER\"}[1m]))", "legendFormat": "{{k8s_pod_name}}"}
+          ]
+        }
+      ]
+    }

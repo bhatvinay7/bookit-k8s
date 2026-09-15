@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-test-pushgateway
+  namespace: monitoring
+  labels:
+    app: load-test-pushgateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-test-pushgateway
+  template:
+    metadata:
+      labels:
+        app: load-test-pushgateway
+    spec:
+      containers:
+        - name: pushgateway
+          image: prom/pushgateway:v1.10.0
+          args:
+            - --web.listen-address=:9091
+          ports:
+            - name: http
+              containerPort: 9091
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-test-pushgateway
+  namespace: monitoring
+  labels:
+    app: load-test-pushgateway
+spec:
+  selector:
+    app: load-test-pushgateway
+  ports:
+    - name: http
+      port: 9091
+      targetPort: http
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: load-test-pushgateway
+  namespace: monitoring
+  labels:
+    app: load-test-pushgateway
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  selector:
+    matchLabels:
+      app: load-test-pushgateway
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

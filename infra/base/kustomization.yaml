@@ -13,3 +13,5 @@ resources:
   - monitoring/tempo.yaml
   - monitoring/grafana-dashboards.yaml
   - monitoring/distributed-tracing-dashboard.yaml
+  - monitoring/load-test-dashboard.yaml
+  - monitoring/load-test-pushgateway.yaml

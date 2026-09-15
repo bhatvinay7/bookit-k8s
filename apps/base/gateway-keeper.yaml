@@ -74,7 +74,9 @@ metadata:
   name: gateway-keeper
   namespace: bookit
 spec:
-  clusterIP: None
+  # A normal ClusterIP Service distributes HTTP and gRPC connections over the
+  # ready Gateway Keeper replicas selected by the HPA. Do not make this
+  # headless: headless DNS returns pod IPs and bypasses kube-proxy balancing.
   ports:
     - name: http
       port: 8080

@@ -1,7 +1,7 @@
 redis:
   storageClassName: do-block-storage
-  replicas: 1
-  proxyReplicas: 1
+  replicas: 3
+  proxyReplicas: 2
   storage: 5Gi
   resources:
     requests:
