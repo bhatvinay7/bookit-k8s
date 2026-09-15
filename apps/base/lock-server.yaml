@@ -4,7 +4,7 @@ metadata:
   labels:
     app: lock-server
   name: lock-server
-  namespace: default
+  namespace: bookit
 spec:
   replicas: 1
   selector:

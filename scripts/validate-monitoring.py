@@ -82,7 +82,7 @@ def check_observability(apps, infra, values):
           "Loki datasource must resolve to the Loki Helm Service")
     link = tempo["jsonData"]["tracesToLogsV2"]
     check(link["datasourceUid"] == loki["uid"] and link["customQuery"]
-          and '{namespace="default"}' in link["query"]
+          and '{namespace="bookit"}' in link["query"]
           and "$${__span.traceId}" in link["query"],
           "Trace-to-log link must use the ingested labels and an escaped trace ID variable")
     derived = loki["jsonData"]["derivedFields"][0]
@@ -93,6 +93,16 @@ def check_observability(apps, infra, values):
         match = re.search(derived["matcherRegex"], line)
         check(match and match.group(1) == trace_id and derived["datasourceUid"] == tempo["uid"],
               "Loki derived field must resolve JSON trace IDs back to Tempo")
+
+    alertmanager = values["alertmanager"]
+    smtp = alertmanager["config"]["global"]
+    check(
+        "smtp_auth_password" not in smtp
+        and smtp.get("smtp_auth_password_file")
+        == "/etc/alertmanager/secrets/alertmanager-secret/smtp_auth_password"
+        and "alertmanager-secret" in alertmanager["alertmanagerSpec"].get("secrets", []),
+        "Alertmanager must mount the sealed SMTP credential instead of storing it in Helm values",
+    )
 
     collector = yaml.safe_load(resource("ConfigMap", "otel-collector-config")["data"]["config.yaml"])
     connector = collector["connectors"]["spanmetrics"]
@@ -140,9 +150,7 @@ def main():
         if chess
         else ("auction" if (ROOT / "argocd/chart").exists() else "bookit")
     )
-    # BookIt uses Kubernetes' default namespace. Keep the historical project
-    # name for image and metric prefixes; it is not the deployment namespace.
-    app_namespace = "default" if project in {"bookit", "chess"} else project
+    app_namespace = "default" if chess else project
     targets = (
         [("dev", "apps", "infra")]
         if chess
@@ -350,7 +358,7 @@ def main():
                 template = appset["spec"]["template"]["spec"]
                 check(
                     template["destination"]
-                    == {"server": "{{url}}", "namespace": "default"},
+                    == {"server": "{{url}}", "namespace": "bookit"},
                     "Incorrect Bookit destination",
                 )
                 if "appsPath" in elements[0]:

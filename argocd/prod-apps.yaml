@@ -23,7 +23,7 @@ spec:
         path: "{{appsPath}}"
       destination:
         server: "{{url}}"
-        namespace: default
+        namespace: bookit
       syncPolicy:
         automated:
           prune: true
@@ -63,7 +63,7 @@ spec:
         path: infra/overlays/prod
       destination:
         server: "{{url}}"
-        namespace: default
+        namespace: bookit
       syncPolicy:
         automated:
           prune: true
