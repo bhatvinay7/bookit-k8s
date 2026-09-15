@@ -2,7 +2,7 @@ apiVersion: databases.spotahome.com/v1
 kind: RedisFailover
 metadata:
   name: bookit-redis
-  namespace: default
+  namespace: bookit
 spec:
   sentinel:
     replicas: 3
@@ -40,7 +40,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: redis-s3-backup
-  namespace: default
+  namespace: bookit
 spec:
   schedule: "0 2 * * *"
   jobTemplate:

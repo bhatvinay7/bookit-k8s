@@ -35,7 +35,7 @@ spec:
               useCloudProvider: true
       destination:
         server: '{{server}}'
-        namespace: default
+        namespace: bookit
       syncPolicy:
         automated:
           prune: true

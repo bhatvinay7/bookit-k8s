@@ -55,8 +55,10 @@ pass "Prometheus CRDs installed."
 
 # 6. Deploy Stateful-Services Helm Chart
 info "Deploying stateful-services Helm chart..."
+kubectl create namespace bookit --dry-run=client -o yaml | kubectl apply -f -
+
 helm upgrade --install stateful-services ./charts/stateful-services \
-  --namespace default \
+  --namespace bookit \
   -f ./charts/stateful-services/values-development.yaml \
   --set postgres.useCloudProvider=false \
   --set mongodb.useCloudProvider=false \
@@ -68,7 +70,7 @@ helm upgrade --install stateful-services ./charts/stateful-services \
 pass "stateful-services Helm chart deployed successfully!"
 
 info "You can now check the running pods with:"
-echo "kubectl get pods -n default"
+echo "kubectl get pods -n bookit"
 
 echo ""
 info "To clean up and destroy the local cluster, run:"

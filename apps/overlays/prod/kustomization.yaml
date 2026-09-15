@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
 
-namespace: default
+namespace: bookit
 
 # Run after the namespace transformer: ClusterIssuer is a cluster-scoped resource,
 # but Kustomize otherwise treats this custom kind as namespaced.
