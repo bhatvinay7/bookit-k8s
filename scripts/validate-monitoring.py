@@ -153,11 +153,10 @@ def check_observability(apps, infra, values):
         parsed = json.loads(content)
         check(parsed.get("uid") == "bookit-load-test", "Load-test dashboard UID is incorrect")
         check(
-            "bookit_load_test_stage_requested_requests" in content
-            and "bookit_load_test_stage_target_rps" in content
-            and "bookit_load_test_rust_lock_requested_requests" in content
+            "bookit_load_test_rust_lock_requested_requests" in content
+            and "bookit_load_test_rust_lock_observed_rps" in content
             and "k8s_pod_name" in content,
-            "Load-test dashboard must expose staged load and per-pod Gateway Keeper metrics",
+            "Load-test dashboard must expose Rust load and per-pod Gateway Keeper metrics",
         )
     check(
         values["grafana"]["sidecar"]["dashboards"].get("folderAnnotation")

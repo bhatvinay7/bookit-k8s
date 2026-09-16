@@ -41,7 +41,7 @@ data:
             "name": "run_id",
             "type": "query",
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "query": "label_values({__name__=~\"bookit_load_test_stage_requested_requests|bookit_load_test_rust_lock_requested_requests\"},run_id)",
+            "query": "label_values(bookit_load_test_rust_lock_requested_requests,run_id)",
             "refresh": 2,
             "includeAll": false
           }
@@ -119,49 +119,11 @@ data:
           ]
         },
         {
-          "id": 8,
-          "type": "timeseries",
-          "title": "Recorded single-seat lock ramp stages",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "gridPos": {"x": 0, "y": 32, "w": 12, "h": 8},
-          "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
-          "targets": [
-            {"refId": "A", "expr": "bookit_load_test_stage_requested_requests{run_id=\"$run_id\"}", "legendFormat": "requested {{stage}}"},
-            {"refId": "B", "expr": "bookit_load_test_stage_completed_requests{run_id=\"$run_id\"}", "legendFormat": "completed {{stage}}"}
-          ]
-        },
-        {
-          "id": 9,
-          "type": "timeseries",
-          "title": "Recorded lock-ramp throughput and duration",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "gridPos": {"x": 12, "y": 32, "w": 12, "h": 8},
-          "fieldConfig": {"defaults": {}, "overrides": []},
-          "targets": [
-            {"refId": "A", "expr": "bookit_load_test_stage_rps{run_id=\"$run_id\"}", "legendFormat": "rps {{stage}}"},
-            {"refId": "B", "expr": "bookit_load_test_stage_duration_seconds{run_id=\"$run_id\"}", "legendFormat": "seconds {{stage}}"},
-            {"refId": "C", "expr": "bookit_load_test_ws_observers{run_id=\"$run_id\"}", "legendFormat": "websocket observers"},
-            {"refId": "D", "expr": "bookit_load_test_stage_grpc_status_requests{run_id=\"$run_id\"}", "legendFormat": "{{stage}} {{grpc_status}}"}
-          ]
-        },
-        {
-          "id": 10,
-          "type": "timeseries",
-          "title": "Lock-ramp target versus observed throughput",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "gridPos": {"x": 0, "y": 40, "w": 12, "h": 8},
-          "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
-          "targets": [
-            {"refId": "A", "expr": "bookit_load_test_stage_target_rps{run_id=\"$run_id\"}", "legendFormat": "target {{stage}}"},
-            {"refId": "B", "expr": "bookit_load_test_stage_rps{run_id=\"$run_id\"}", "legendFormat": "observed {{stage}}"}
-          ]
-        },
-        {
           "id": 11,
           "type": "timeseries",
           "title": "Gateway Keeper request rate by pod",
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "gridPos": {"x": 12, "y": 40, "w": 12, "h": 8},
+          "gridPos": {"x": 0, "y": 32, "w": 24, "h": 8},
           "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
           "targets": [
             {"refId": "A", "expr": "sum by(k8s_pod_name)(rate(bookit_traces_spanmetrics_calls_total{service_name=\"bookit-gateway-keeper\",span_kind=\"SPAN_KIND_SERVER\"}[1m]))", "legendFormat": "{{k8s_pod_name}}"}
@@ -172,7 +134,7 @@ data:
           "type": "timeseries",
           "title": "Rust Kubernetes lock Job result",
           "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "gridPos": {"x": 0, "y": 48, "w": 24, "h": 8},
+          "gridPos": {"x": 0, "y": 40, "w": 24, "h": 8},
           "fieldConfig": {"defaults": {}, "overrides": []},
           "targets": [
             {"refId": "A", "expr": "bookit_load_test_rust_lock_requested_requests{run_id=\"$run_id\"}", "legendFormat": "requested"},
