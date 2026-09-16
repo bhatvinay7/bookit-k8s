@@ -55,14 +55,6 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: CLOUDFLARE_R2_BUCKET
-            - name: CLOUDFLARE_R2_PUBLIC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: CLOUDFLARE_R2_PUBLIC_URL
-            # Derive the S3 endpoint from the account ID; ignore stale legacy endpoints.
-            - name: CLOUDFLARE_R2_ENDPOINT
-              value: ""
           image: bookit-http-server:latest
           livenessProbe:
             httpGet:

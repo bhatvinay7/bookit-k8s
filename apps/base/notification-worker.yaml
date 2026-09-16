@@ -87,13 +87,6 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: CLOUDFLARE_R2_BUCKET
-            - name: CLOUDFLARE_R2_PUBLIC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secrets
-                  key: CLOUDFLARE_R2_PUBLIC_URL
-            - name: CLOUDFLARE_R2_ENDPOINT
-              value: ""
           image: bookit-notification-worker:latest
           name: notification-worker
           resources:

@@ -145,6 +145,7 @@ seal bookit backend-secrets sealed-backend-secrets.yaml \
   --from-literal=CLOUDFLARE_R2_ENDPOINT="$CLOUDFLARE_R2_ENDPOINT" \
   --from-literal=CLOUDFLARE_R2_BUCKET="$CLOUDFLARE_R2_BUCKET" \
   --from-literal=CLOUDFLARE_R2_PUBLIC_URL="$CLOUDFLARE_R2_PUBLIC_URL" \
+  --from-literal=NEXT_PUBLIC_R2_PUBLIC_URL="$CLOUDFLARE_R2_PUBLIC_URL" \
   --from-literal=GOOGLE_CLIENT_ID="$GOOGLE_CLIENT_ID" \
   --from-literal=GOOGLE_CLIENT_SECRET="$GOOGLE_CLIENT_SECRET"
 
