@@ -157,7 +157,7 @@ images:
   newTag: commit-454c01f
 - name: bookit-http-server
   newName: ghcr.io/bhatvinay7/bookit-http-server
-  newTag: commit-18e267c
+  newTag: commit-ff206b6
 - name: bookit-load-test-runner
   newName: ghcr.io/bhatvinay7/bookit-load-test-runner
   newTag: commit-425eddd
@@ -166,7 +166,7 @@ images:
   newTag: commit-454c01f
 - name: bookit-notification-worker
   newName: ghcr.io/bhatvinay7/bookit-notification-worker
-  newTag: commit-454c01f
+  newTag: commit-ff206b6
 - name: bookit-outbox-server
   newName: ghcr.io/bhatvinay7/bookit-outbox-server
   newTag: commit-454c01f
