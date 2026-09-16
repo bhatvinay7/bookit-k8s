@@ -1,0 +1,57 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: lock-server-scaledobject
+  annotations: { argocd.argoproj.io/sync-wave: "25" }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: lock-server }
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  cooldownPeriod: 120
+  pollingInterval: 15
+  triggers:
+    - type: rabbitmq
+      metadata:
+        protocol: amqp
+        queueName: seat_lock_queue
+        mode: QueueLength
+        value: "50"           # 1 replica per 50 messages in queue
+      authenticationRef: { name: keda-rabbitmq-auth }
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: payment-processor-scaledobject
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: payment-processor }
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  cooldownPeriod: 300
+  pollingInterval: 10
+  triggers:
+    - type: rabbitmq
+      metadata: { protocol: amqp, queueName: payment_queue, mode: QueueLength, value: "10" }
+      authenticationRef: { name: keda-rabbitmq-auth }
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: notification-worker-scaledobject
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: notification-worker }
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  cooldownPeriod: 120
+  pollingInterval: 15
+  triggers:
+    - type: rabbitmq
+      metadata: { protocol: amqp, queueName: notification_queue, mode: QueueLength, value: "100" }
+      authenticationRef: { name: keda-rabbitmq-auth }
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-rabbitmq-auth
+spec:
+  secretTargetRef:
+    - { parameter: host, name: backend-secrets, key: RABBITMQ_URL }

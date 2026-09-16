@@ -6,6 +6,7 @@ resources:
   - argocd-ingress.yaml
   - argocd-admin-secret.yaml
   - argocd-loadbalancer.yaml
+  - bootstrap-keda.yaml
 
 # Apply dev-apps.yaml or prod-apps.yaml explicitly from the branch-aware
 # bootstrap workflow. Including both here could target the wrong environment.

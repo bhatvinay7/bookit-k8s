@@ -20,3 +20,4 @@ resources:
 - ingress.yaml
 - grpc-ingress.yaml
 - monitoring/bookit-alerts.yaml
+- keda-scaledobjects.yaml
